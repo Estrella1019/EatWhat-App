@@ -253,7 +253,6 @@ static const String _baseUrl = 'http://your-backend-url:8000';
 
 ## 下一步计划
 
-- [ ] 与视图组（金欣怡）对接UI组件
 - [ ] 集成真实后端API
 - [ ] 添加Loading动画（Lottie）
 - [ ] 优化动画效果
