@@ -1,0 +1,325 @@
+{
+  "@@locale": "zh",
+
+  "appTitle": "吃啥APP",
+  "@appTitle": {
+    "description": "应用标题"
+  },
+
+  "todayEatWhat": "今天吃什么？",
+  "@todayEatWhat": {
+    "description": "首页标题"
+  },
+
+  "myFridge": "我的冰箱",
+  "@myFridge": {
+    "description": "冰箱标签"
+  },
+
+  "profile": "个人档案",
+  "@profile": {
+    "description": "个人档案标签"
+  },
+
+  "profileTitle": "个人档案",
+  "@profileTitle": {
+    "description": "个人档案页面标题"
+  },
+
+  "save": "保存",
+  "@save": {
+    "description": "保存按钮"
+  },
+
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮"
+  },
+
+  "add": "添加",
+  "@add": {
+    "description": "添加按钮"
+  },
+
+  "delete": "删除",
+  "@delete": {
+    "description": "删除按钮"
+  },
+
+  "edit": "编辑",
+  "@edit": {
+    "description": "编辑按钮"
+  },
+
+  "confirm": "确认",
+  "@confirm": {
+    "description": "确认按钮"
+  },
+
+  "manageProfiles": "管理个人档案",
+  "@manageProfiles": {
+    "description": "管理档案标题"
+  },
+
+  "addFamilyFriends": "添加家人和朋友的档案",
+  "@addFamilyFriends": {
+    "description": "管理档案副标题"
+  },
+
+  "username": "用户名",
+  "@username": {
+    "description": "用户名标签"
+  },
+
+  "enterUsername": "请输入用户名",
+  "@enterUsername": {
+    "description": "用户名输入提示"
+  },
+
+  "allergens": "过敏原",
+  "@allergens": {
+    "description": "过敏原标签"
+  },
+
+  "selectOrAddAllergens": "选择或添加你的过敏食材",
+  "@selectOrAddAllergens": {
+    "description": "过敏原副标题"
+  },
+
+  "customAllergen": "自定义",
+  "@customAllergen": {
+    "description": "自定义过敏原按钮"
+  },
+
+  "customAllergens": "自定义过敏源：",
+  "@customAllergens": {
+    "description": "自定义过敏原列表标题"
+  },
+
+  "addCustomAllergen": "添加自定义过敏源",
+  "@addCustomAllergen": {
+    "description": "添加自定义过敏原对话框标题"
+  },
+
+  "enterAllergenName": "请输入过敏源名称",
+  "@enterAllergenName": {
+    "description": "过敏原名称输入提示"
+  },
+
+  "allergenAdded": "已添加过敏源: {name}",
+  "@allergenAdded": {
+    "description": "过敏原添加成功提示",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "tastePreferences": "口味偏好",
+  "@tastePreferences": {
+    "description": "口味偏好标签"
+  },
+
+  "multipleChoice": "可多选",
+  "@multipleChoice": {
+    "description": "多选提示"
+  },
+
+  "defaultServings": "默认就餐人数",
+  "@defaultServings": {
+    "description": "就餐人数标签"
+  },
+
+  "people": "人",
+  "@people": {
+    "description": "人数单位"
+  },
+
+  "languageSettings": "语言设置",
+  "@languageSettings": {
+    "description": "语言设置标签"
+  },
+
+  "followSystem": "跟随系统",
+  "@followSystem": {
+    "description": "跟随系统语言选项"
+  },
+
+  "simplifiedChinese": "简体中文",
+  "@simplifiedChinese": {
+    "description": "简体中文选项"
+  },
+
+  "traditionalChinese": "繁体中文",
+  "@traditionalChinese": {
+    "description": "繁体中文选项"
+  },
+
+  "english": "English",
+  "@english": {
+    "description": "英文选项"
+  },
+
+  "languageSwitched": "语言已切换",
+  "@languageSwitched": {
+    "description": "语言切换成功提示"
+  },
+
+  "peanut": "花生",
+  "seafood": "海鲜",
+  "milk": "牛奶",
+  "egg": "鸡蛋",
+  "soybean": "大豆",
+  "wheat": "小麦",
+  "nuts": "坚果",
+  "sesame": "芝麻",
+
+  "mild": "清淡",
+  "heavy": "重口味",
+  "mildlySpicy": "微辣",
+  "mediumSpicy": "中辣",
+  "verySpicy": "特辣",
+  "sweet": "甜味",
+  "sour": "酸味",
+
+  "pantryTitle": "我的冰箱",
+  "@pantryTitle": {
+    "description": "冰箱页面标题"
+  },
+
+  "ingredientCount": "{count} 种食材",
+  "@ingredientCount": {
+    "description": "食材数量",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "addIngredient": "添加食材",
+  "@addIngredient": {
+    "description": "添加食材按钮"
+  },
+
+  "scanIngredient": "扫描食材",
+  "@scanIngredient": {
+    "description": "扫描食材按钮"
+  },
+
+  "emptyPantry": "冰箱空空如也",
+  "@emptyPantry": {
+    "description": "空冰箱提示"
+  },
+
+  "addIngredientsToStart": "添加食材开始使用吧",
+  "@addIngredientsToStart": {
+    "description": "空冰箱副标题"
+  },
+
+  "generateRecipe": "生成食谱",
+  "@generateRecipe": {
+    "description": "生成食谱按钮"
+  },
+
+  "generating": "生成中...",
+  "@generating": {
+    "description": "生成中提示"
+  },
+
+  "recipeRecommendation": "食谱推荐",
+  "@recipeRecommendation": {
+    "description": "食谱推荐标题"
+  },
+
+  "searchRecipesIngredients": "搜索食谱、食材...",
+  "@searchRecipesIngredients": {
+    "description": "搜索框提示"
+  },
+
+  "smartARScan": "智能AR扫描",
+  "@smartARScan": {
+    "description": "AR扫描标题"
+  },
+
+  "startScan": "开始扫描",
+  "@startScan": {
+    "description": "开始扫描按钮"
+  },
+
+  "realtimeRecognition": "实时识别食材，一键生成食谱",
+  "@realtimeRecognition": {
+    "description": "AR扫描描述"
+  },
+
+  "quickStart": "快速开始，发现美味...",
+  "@quickStart": {
+    "description": "快速开始标题"
+  },
+
+  "photoRecognition": "相册识别",
+  "@photoRecognition": {
+    "description": "相册识别标题"
+  },
+
+  "recognizeFromPhoto": "从照片识别食材",
+  "@recognizeFromPhoto": {
+    "description": "相册识别描述"
+  },
+
+  "weightEstimation": "重量估算",
+  "@weightEstimation": {
+    "description": "重量估算标题"
+  },
+
+  "smartPortionRecognition": "智能份量识别",
+  "@smartPortionRecognition": {
+    "description": "重量估算描述"
+  },
+
+  "todayTrending": "今日热门",
+  "@todayTrending": {
+    "description": "今日热门标题"
+  },
+
+  "viewMore": "查看更多",
+  "@viewMore": {
+    "description": "查看更多按钮"
+  },
+
+  "viewAll": "查看全部",
+  "@viewAll": {
+    "description": "查看全部按钮"
+  },
+
+  "moreItems": "还有 {count} 种...",
+  "@moreItems": {
+    "description": "更多项目提示",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "cookWithThese": "用这些食材做菜",
+  "@cookWithThese": {
+    "description": "用食材做菜按钮"
+  },
+
+  "generatingRecipe": "正在生成食谱...",
+  "@generatingRecipe": {
+    "description": "生成食谱中提示"
+  },
+
+  "generationFailed": "生成失败: {error}",
+  "@generationFailed": {
+    "description": "生成失败提示",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}
