@@ -29,6 +29,17 @@
 - **Ollama + Qianwen** - 千问大模型（食谱生成）
 - **PostgreSQL** - 数据库
 
+## 👥 小组分工 (Team Members & Roles)
+
+| 姓名 (Name) | 角色 (Role) | 主要职责 (Responsibilities) |
+| :--- | :--- | :--- |
+| **Tao Yufei** | **项目经理 (PM)** / 后端 | 需求分析、进度把控、FastAPI 架构搭建、数据库设计 |
+| **Pan Jiaying** | **前端负责人 (Frontend Lead)** | Flutter 移动端 UI 开发、状态管理 (Provider)、前后端 API 对接 |
+| **Jin Xinyi** | UI 设计 / 测试 | Figma 原型设计、用户体验优化、QA 测试与文档编写 |
+| **Liu Xingzhe** | AI 算法工程师 | YOLOv8 食材识别模型训练、Ollama/LLM 服务部署 |
+| **Cheng Yuxiang** | 后端开发 / 运维 | 编写 API 接口、Docker 环境配置、服务器部署 |
+
+
 ## 核心功能
 
 ### 1. 智能食材识别 ✅
