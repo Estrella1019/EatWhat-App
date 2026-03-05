@@ -1,0 +1,5 @@
+# 忽略 Flutter 某些自动生成的文件或目录不参与语言统计
+lib/l10n/* linguist-generated=true
+# 如果有其他不想统计的目录也可以加上
+# ios/* linguist-generated=true
+# android/* linguist-generated=true
