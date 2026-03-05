@@ -1,34 +1,32 @@
-# 吃啥APP (EatWhat App)
+# 吃啥 APP — 前端应用 / EatWhat APP — Frontend Application
 
-基于 YOLO-World 的智能食谱推荐应用
+> Flutter + YOLO-World 食材识别 + Qwen 大模型菜谱推荐 + 用户认证系统
+> Flutter + YOLO-World Ingredient Recognition + Qwen LLM Recipe Generation + User Authentication
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue.svg)](https://flutter.dev/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+---
 
-## 项目简介
+## 目录 / Table of Contents
 
-吃啥APP是一个创新的智能食谱推荐应用，通过AI视觉识别技术帮助用户：
-- 📸 实时识别冰箱中的食材
-- 🍳 智能生成个性化食谱
-- 👥 管理家庭成员的饮食偏好
-- 🌍 支持多语言（简体中文、繁体中文、英文）
+- [项目简介 / Overview](#项目简介--overview)
+- [小组分工 / Team Structure](#小组分工--team-structure)
+- [核心功能 / Core Features](#核心功能--core-features)
+- [技术栈 / Tech Stack](#技术栈--tech-stack)
+- [项目结构 / Project Structure](#项目结构--project-structure)
+- [快速开始 / Quick Start](#快速开始--quick-start)
+- [后端对接 / Backend Integration](#后端对接--backend-integration)
+- [团队分工 / Team Structure](#团队分工--team-structure)
 
-## 技术栈
+---
 
-### 前端
-- **Flutter** - 跨平台移动应用框架
-- **Provider** - 状态管理
-- **SharedPreferences** - 本地数据持久化
-- **Flutter Localizations** - 国际化支持
-- **Dio** - 网络请求
-- **Image Picker** - 图片选择
+## 项目简介 / Overview
 
-### 后端（规划中）
-- **Python + FastAPI** - 后端API框架
-- **YOLOv8 / YOLO-World** - 食材识别模型
-- **Ollama + Qianwen** - 千问大模型（食谱生成）
-- **PostgreSQL** - 数据库
+**中文**
+用户通过拍照上传食材图片，前端调用后端 YOLO-World 模型识别食材，再将识别结果传给本地 Qwen 大模型生成个性化菜谱（支持人数、忌口、过敏原、口味偏好）。用户可注册/登录，收藏菜谱，管理个人过敏原和多用户档案。
 
+**English**
+Users upload photos of their ingredients. The app calls the backend YOLO-World model to detect ingredients, then passes the results to a local Qwen LLM to generate personalized recipes. Users can register/login, save favorites, manage allergens, and create multiple user profiles for family members.
+
+---
 ## 👥 小组分工 (Team Members & Roles)
 
 | 姓名 (Name) | 角色 (Role) | 主要职责 (Responsibilities) |
@@ -39,232 +37,332 @@
 | **Liu Xingzhe** | AI 算法工程师 | YOLOv8 食材识别模型训练、Ollama/LLM 服务部署 |
 | **Cheng Yuxiang** | 后端开发 / 运维 | 编写 API 接口、Docker 环境配置、服务器部署 |
 
+---
+## 核心功能 / Core Features
 
-## 核心功能
+### 1. 智能食材识别 / Smart Ingredient Recognition
+- 📸 拍照识别 + AR 实时扫描 / Photo recognition + AR real-time scanning
+- 🎯 支持 50+ 常见食材 / Supports 50+ common ingredients
+- ⚖️ 重量估算 / Weight estimation
+- 🔄 与后端 YOLO-World 模型对接 / Integrated with backend YOLO-World
 
-### 1. 智能食材识别 ✅
-- 实时AR扫描识别食材
-- 相册图片识别
-- 支持50+种常见食材
-- 重量和份量估算
+### 2. 个性化菜谱生成 / Personalized Recipe Generation
+- 🤖 基于 Qwen 大模型生成菜谱 / Powered by Qwen LLM
+- 👥 支持多人就餐场景 / Multi-person dining support
+- 🚫 过敏原自动过滤 / Automatic allergen filtering
+- 🎨 口味偏好定制 / Taste preference customization
+- 🔄 备用菜即时替换 / Instant candidate dish swapping
 
-### 2. 个性化食谱推荐 ✅
-- 基于现有食材生成食谱
-- 考虑过敏原和口味偏好
-- 支持多人用餐场景
-- 智能食谱替换（无感替换）
+### 3. 用户认证系统 / User Authentication
+- 🔐 注册/登录功能 / Register/Login functionality
+- 🎫 JWT token 自动管理 / Automatic JWT token management
+- ⭐ 收藏菜谱 / Save favorite recipes
+- 🏥 过敏原管理 / Allergen management
+- 👤 多用户档案 / Multiple user profiles
 
-### 3. 多用户档案管理 ✅
-- 家庭成员档案管理
-- 个性化过敏原设置
-- 口味偏好配置
-- 默认用餐人数
+### 4. 虚拟冰箱 / Virtual Pantry
+- 📦 食材库存管理 / Ingredient inventory management
+- ⏰ 过期提醒 / Expiration reminders
+- 📊 分类展示 / Categorized display
 
-### 4. 虚拟冰箱 ✅
-- 食材库存管理
-- 过期提醒
-- 快速添加/删除食材
-- 食材分类展示
+### 5. 国际化支持 / Internationalization
+- 🌍 简体中文 / Simplified Chinese
+- 🌎 English
+- 🔄 动态语言切换 / Dynamic language switching
 
-### 5. 国际化支持 ✅
-- 🇨🇳 简体中文
-- 🇭🇰 繁体中文
-- 🇺🇸 English
-- 动态语言切换
 
-## 项目结构
+---
+## 🛠 技术栈
+
+### 前端 (Flutter)
+- **框架**: Flutter (跨平台移动应用框架)
+- **状态管理**: Provider
+- **数据持久化**: SharedPreferences
+- **网络请求**: Dio
+- **核心依赖**: Image Picker, Flutter Localizations
+
+### 后端 (Python + FastAPI)
+- **Web 框架**: FastAPI
+- **CV 模型**: YOLOv8s-World (ultralytics) - 零样本食材识别
+- **大语言模型**: Qwen3:14b (via Ollama) - 菜谱生成
+- **数据库**: PostgreSQL + SQLAlchemy
+- **认证鉴权**: JWT (python-jose + passlib)
+  
+---
+
+## 项目结构 / Project Structure
 
 ```
 lib/
-├── config/           # 配置文件
-│   └── theme.dart    # 主题配置
-├── l10n/            # 国际化文件
-│   ├── app_zh.arb           # 简体中文
-│   ├── app_zh_Hant.arb      # 繁体中文
-│   ├── app_en.arb           # 英文
-│   └── app_localizations.dart
-├── models/          # 数据模型
-│   ├── user.dart    # 用户模型
-│   ├── pantry.dart  # 虚拟冰箱模型
-│   └── food_portion_data.dart
-├── providers/       # 状态管理
-│   ├── user_provider.dart    # 用户状态
-│   ├── pantry_provider.dart  # 冰箱状态
-│   └── global_provider.dart  # 全局状态
-├── services/        # 服务层
-│   ├── storage_service.dart     # 本地存储
-│   └── pantry_service.dart      # 冰箱服务
-├── screens/         # 页面
-│   ├── home_screen.dart              # 首页
-│   ├── pantry_screen.dart            # 虚拟冰箱
-│   ├── profile_screen.dart           # 个人档案
-│   ├── profiles_management_screen.dart # 档案管理
-│   ├── food_portion_input_screen.dart  # 份量输入
-│   └── food_weight_demo_screen.dart    # 重量演示
-└── main.dart        # 入口文件
+├── main.dart                    # 应用入口 / App entry point
+├── config/
+│   └── theme.dart              # 主题配置 / Theme configuration
+├── l10n/                       # 国际化文件 / Localization files
+│   ├── app_localizations.dart
+│   ├── app_zh.arb             # 简体中文
+│   └── app_en.arb             # English
+├── models/
+│   ├── user.dart              # 用户模型 / User model
+│   ├── recipe.dart            # 菜谱模型 / Recipe model
+│   ├── ingredient.dart        # 食材模型 / Ingredient model
+│   ├── auth.dart              # 认证模型 / Auth models
+│   ├── favorite.dart          # 收藏模型 / Favorite models
+│   └── pantry.dart            # 冰箱模型 / Pantry model
+├── providers/
+│   ├── user_provider.dart     # 用户状态管理 / User state
+│   ├── global_provider.dart   # 全局状态管理 / Global state
+│   └── pantry_provider.dart   # 冰箱状态管理 / Pantry state
+├── services/
+│   ├── api_service.dart       # API 服务 / API service
+│   ├── auth_service.dart      # 认证服务 / Auth service
+│   ├── storage_service.dart   # 本地存储 / Local storage
+│   ├── media_service.dart     # 媒体服务 / Media service
+│   └── pantry_service.dart    # 冰箱服务 / Pantry service
+├── screens/
+│   ├── home_screen.dart       # 主页 / Home
+│   ├── login_screen.dart      # 登录 / Login
+│   ├── register_screen.dart   # 注册 / Register
+│   ├── profile_screen.dart    # 个人资料 / Profile
+│   ├── pantry_screen.dart     # 虚拟冰箱 / Pantry
+│   ├── result_screen.dart     # 结果页 / Results
+│   ├── recipe_detail_screen.dart  # 菜谱详情 / Recipe detail
+│   └── favorites_screen.dart  # 收藏列表 / Favorites
+└── widgets/
+    └── recipe_card.dart       # 菜谱卡片 / Recipe card
 ```
 
-## 快速开始
+---
 
-### 环境要求
-- Flutter SDK >= 3.0.0
-- Dart SDK >= 3.0.0
+## 快速开始 / Quick Start
 
-### 安装步骤
+### 前置条件 / Prerequisites
 
-1. 克隆项目
-```bash
-git clone https://github.com/Estrella1019/EatWhat-App.git
-cd EatWhat-App
-```
+1. **Flutter SDK 3.0+**
+2. **后端服务已启动** / Backend service running
+   - 参考后端仓库：https://github.com/noasse/eating
+   - 确保后端运行在 `http://localhost:8000`
 
-2. 安装依赖
+### 安装依赖 / Install Dependencies
+
 ```bash
 flutter pub get
 ```
 
-3. 生成国际化文件
+### 生成国际化文件 / Generate Localization Files
+
 ```bash
 flutter gen-l10n
 ```
 
-4. 运行应用
+### 配置后端地址 / Configure Backend URL
+
+修改 `lib/services/api_service.dart` 和 `lib/services/auth_service.dart` 中的 `baseUrl`：
+
+```dart
+// 模拟器测试 / Simulator testing
+static const String _baseUrl = 'http://localhost:8000';
+
+// 真机测试 / Physical device testing
+static const String _baseUrl = 'http://192.168.x.x:8000';  // 替换为你的电脑IP
+```
+
+### 启动应用 / Start Application
+
 ```bash
 flutter run
 ```
 
-## 技术亮点
+---
 
-### 1. YOLO-World 零样本识别
-- 采用 CVPR 2024 最新论文技术
-- 开放词汇检测，无需训练即可识别新食材
-- 解决长尾食材识别问题
-- 支持实时AR扫描
+## 后端对接 / Backend Integration
 
-### 2. 完整的国际化系统
-- 支持简体中文、繁体中文、英文
-- 动态语言切换
-- 本地化存储
-- 修复繁体中文 Locale 问题（使用 `Locale.fromSubtags`）
+### API 接口 / API Endpoints
 
-### 3. 智能食谱生成
-- 千问大模型驱动
-- 考虑过敏原和口味偏好
-- 支持单条食谱替换（无感替换）
-- 食谱缓存机制
+所有接口统一返回格式 / Unified response format:
 
-### 4. 多用户档案管理
-- 支持家庭成员管理
-- 个性化设置
-- 数据持久化
-
-### API流程（匹配后端设计）
-
-**两步流程：**
-1. **识别食材**: `POST /api/identify` - 上传图片，返回食材列表
-2. **生成食谱**: `POST /api/generate_recipes` - 根据食材生成食谱
-
-**其他接口：**
-- `POST /api/get_one_recipe` - 获取单个食谱（无感替换）
-- `POST /api/user/profile` - 创建/更新用户档案
-- `GET /api/user/profile/{userId}` - 获取用户档案
-- `GET /api/user/history/{userId}` - 获取用户历史记录
-
-### 数据模型
-
-**Ingredient（食材）**
 ```json
 {
-  "name": "番茄",
-  "count": 2,
-  "confidence": 0.95,
-  "bbox": [x, y, width, height]
+  "code": 200,
+  "message": "success",
+  "data": { ... }
 }
 ```
 
-**IdentifyResult（识别结果）**
+需要登录的接口须在 Header 中携带 / Protected endpoints require:
+```
+Authorization: Bearer <access_token>
+```
+
+---
+
+### 认证接口 / Authentication
+
+#### 注册 / Register
+**`POST /api/auth/register`**
+
+```dart
+await AuthService.getInstance().register(
+  username: "张三",
+  email: "zhangsan@example.com",
+  password: "your_password",
+);
+```
+
+#### 登录 / Login
+**`POST /api/auth/login`**
+
+```dart
+await AuthService.getInstance().login(
+  username: "张三",
+  password: "your_password",
+);
+```
+
+---
+
+### 食材识别 / Ingredient Recognition
+
+**`POST /api/ingredients/recognize`**
+
+```dart
+final result = await ApiService.getInstance().identifyIngredients(
+  imageBytes: imageBytes,
+);
+```
+
+**响应示例 / Response Example:**
 ```json
 {
-  "ingredients": [...],
-  "total_items": 4,
-  "image_hash": "abc123"
+  "code": 200,
+  "data": {
+    "detected_ingredients": [
+      {
+        "name": { "zh": "番茄/西红柿", "en": "Tomato" },
+        "category": "vegetables",
+        "confidence": 0.748,
+        "bbox": [440.5, 344.6, 552.9, 449.4]
+      }
+    ]
+  }
 }
 ```
 
-**Recipe（食谱）** - 保持不变
+---
 
-## 运行项目
+### 菜谱生成 / Recipe Generation
 
-### 1. 安装依赖
-```bash
-cd chisha_app
-flutter pub get
-```
+**`POST /api/recipes/generate`**
 
-### 2. 运行项目
-```bash
-flutter run
-```
+> ⚠️ 本接口调用本地大模型，响应时间约 30–120 秒。
+> ⚠️ This endpoint calls a local LLM. Response time is ~30–120 seconds.
 
-### 3. 切换到真实API
-当后端API准备好后，修改 `lib/providers/global_provider.dart`:
 ```dart
-// 将
-final MockApiService _apiService = MockApiService.getInstance();
-// 改为
-final ApiService _apiService = ApiService.getInstance();
+final result = await ApiService.getInstance().generateRecipes(
+  ingredients: ["番茄", "鸡蛋", "土豆"],
+  allergens: ["花生"],
+  servings: 2,
+  preferences: ["快手", "下饭"],
+);
 ```
 
-并在 `lib/services/api_service.dart` 中修改 baseUrl:
+**响应包含主菜单 + 2道备用菜 / Response includes main dishes + 2 candidates:**
+```json
+{
+  "code": 200,
+  "data": {
+    "recipes": [...],      // 主菜单
+    "candidates": [...]    // 备用菜（前端即时替换，无需再次调用接口）
+  }
+}
+```
+
+---
+
+### 收藏管理 / Favorites Management
+
+#### 获取收藏列表 / Get Favorites
+**`GET /api/users/favorites`**
+
 ```dart
-static const String _baseUrl = 'http://your-backend-url:8000';
+final favorites = await AuthService.getInstance().getFavorites();
 ```
 
-## 主要依赖
+#### 添加收藏 / Add Favorite
+**`POST /api/users/favorites`**
 
-- provider: 状态管理
-- shared_preferences: 本地存储
-- dio: 网络请求
-- image_picker: 图片选择
-- flutter_image_compress: 图片压缩
-- cached_network_image: 图片缓存
+```dart
+await AuthService.getInstance().addFavorite(
+  recipeName: "番茄炒蛋",
+  recipeData: recipe.toJson(),
+);
+```
 
-## 测试要点
+#### 删除收藏 / Delete Favorite
+**`DELETE /api/users/favorites/{id}`**
 
-### 数据模型测试
-- [x] 传入空 JSON 字段不报错
-- [x] 能生成默认值
+```dart
+await AuthService.getInstance().deleteFavorite(favoriteId);
+```
 
-### 状态管理测试
-- [x] Provider 跨页面数据共享
-- [x] 重启后加载上次保存的设置
+---
 
-### 图片处理测试
-- [x] 拍照功能正常
-- [x] 压缩后图片 <500KB
-- [x] 控制台打印压缩信息
+### 过敏原管理 / Allergen Management
 
-### API测试
-- [x] Mock数据正常返回
-- [x] 网络错误提示
-- [x] 数据传递到UI层
+#### 获取过敏原 / Get Allergens
+**`GET /api/users/allergens`**
 
-### 无感替换测试
-- [x] 点击刷新按钮
-- [x] 单个卡片翻转动画
-- [x] 其他卡片不受影响
-- [x] 无全屏Loading
+```dart
+final allergens = await AuthService.getInstance().getAllergens();
+```
 
-## 注意事项
+#### 添加过敏原 / Add Allergen
+**`POST /api/users/allergens`**
 
-1. 当前使用 Mock 数据，图片URL使用 picsum.photos 占位图
-2. 需要在真机上测试拍照功能
-3. iOS需要在 Info.plist 中添加相机和相册权限
-4. Android需要在 AndroidManifest.xml 中添加相应权限
+```dart
+await AuthService.getInstance().addAllergen("花生");
+```
 
-## 下一步计划
+#### 删除过敏原 / Delete Allergen
+**`DELETE /api/users/allergens/{id}`**
 
-- [ ] 集成真实后端API
-- [ ] 添加Loading动画（Lottie）
-- [ ] 优化动画效果
-- [ ] 添加单元测试
+```dart
+await AuthService.getInstance().deleteAllergen(allergenId);
+```
+
+---
+
+
+---
+
+## 开发进度 / Development Progress
+
+- [x] 基础框架搭建 / Basic framework
+- [x] 国际化支持 / Internationalization
+- [x] 食材识别功能 / Ingredient recognition
+- [x] 菜谱生成功能 / Recipe generation
+- [x] 用户认证系统 / User authentication
+- [x] 收藏功能 / Favorites
+- [x] 过敏原管理 / Allergen management
+- [x] 虚拟冰箱 / Virtual pantry
+- [x] 多用户档案 / Multiple profiles
+- [x] 前后端完整对接 / Full backend integration
+
+---
+
+## 相关链接 / Related Links
+
+- **后端仓库 / Backend Repository**: https://github.com/noasse/eating
+- **API 文档 / API Documentation**: http://localhost:8000/docs (启动后端后访问)
+
+---
+
+## 许可证 / License
+
+MIT License
+
+---
+
+## 联系方式 / Contact
+
+如有问题或建议，请提交 Issue 或 Pull Request。
+For questions or suggestions, please submit an Issue or Pull Request.
