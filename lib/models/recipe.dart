@@ -23,26 +23,51 @@ class Recipe {
   });
 
   /// 从JSON创建Recipe对象
+  /// 兼容后端格式：name/difficulty/tags 均为 {"zh":..., "en":...} 对象
+  /// ingredients 为对象列表，steps 为带 step 序号的对象列表
   factory Recipe.fromJson(Map<String, dynamic> json) {
+    // 解析双语字段，优先取中文
+    String parseBilingual(dynamic field) {
+      if (field is Map) {
+        return field['zh']?.toString() ?? field['en']?.toString() ?? '';
+      }
+      return field?.toString() ?? '';
+    }
+
+    // 解析 ingredients：[{name: {zh,en}, quantity, unit: {zh,en}}] → ["番茄 2个"]
+    final rawIngredients = json['ingredients'] as List<dynamic>? ?? [];
+    final ingredients = rawIngredients.map((item) {
+      if (item is Map) {
+        final itemName = parseBilingual(item['name']);
+        final quantity = item['quantity']?.toString() ?? '';
+        return quantity.isNotEmpty ? '$itemName $quantity' : itemName;
+      }
+      return item.toString();
+    }).toList();
+
+    // 解析 steps：[{step:1, description:{zh,en}}] → ["步骤文字"]
+    final rawSteps = json['steps'] as List<dynamic>? ?? [];
+    final steps = rawSteps.map((item) {
+      if (item is Map) {
+        return parseBilingual(item['description']);
+      }
+      return item.toString();
+    }).toList();
+
+    // 解析 tags：[{zh,en}] → ["快手菜"]
+    final rawTags = json['tags'] as List<dynamic>? ?? [];
+    final tags = rawTags.map((item) => parseBilingual(item)).toList();
+
     return Recipe(
       id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '未知菜谱',
+      name: parseBilingual(json['name']),
       imageUrl: json['image_url']?.toString() ?? '',
-      ingredients: (json['ingredients'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      steps: (json['steps'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      ingredients: ingredients,
+      steps: steps,
       servings: json['servings'] as int? ?? 2,
       cookingTime: json['cooking_time'] as int? ?? 30,
-      difficulty: json['difficulty']?.toString() ?? '中等',
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      difficulty: parseBilingual(json['difficulty']),
+      tags: tags,
     );
   }
 

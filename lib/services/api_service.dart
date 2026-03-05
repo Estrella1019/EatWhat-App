@@ -2,27 +2,32 @@ import 'package:dio/dio.dart';
 import 'dart:typed_data';
 import '../models/recipe.dart';
 import '../models/ingredient.dart';
-import '../models/user.dart';
 
-/// API服务 - 处理所有网络请求（匹配后端接口设计）
+/// 生成菜谱的返回结果，包含主菜单和备用菜
+class GenerateResult {
+  final List<Recipe> recipes;
+  final List<Recipe> candidates;
+
+  GenerateResult({required this.recipes, required this.candidates});
+}
+
+/// API服务 - 处理所有网络请求
 class ApiService {
   static ApiService? _instance;
   late Dio _dio;
 
-  // API基础URL（后续替换为实际地址）
   static const String _baseUrl = 'http://localhost:8000';
 
   ApiService._() {
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
       connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 30), // 生成食谱可能需要更长时间
+      receiveTimeout: const Duration(seconds: 180), // LLM 生成最长约 120 秒
       headers: {
         'Content-Type': 'application/json',
       },
     ));
 
-    // 添加拦截器
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         print('请求: ${options.method} ${options.path}');
@@ -40,35 +45,30 @@ class ApiService {
     ));
   }
 
-  /// 获取单例
   static ApiService getInstance() {
     _instance ??= ApiService._();
     return _instance!;
   }
 
   /// 步骤1: 上传图片并识别食材
-  /// 对应后端接口: POST /api/identify
+  /// 对应后端接口: POST /api/ingredients/recognize
   Future<IdentifyResult> identifyIngredients({
     required Uint8List imageBytes,
   }) async {
     try {
-      // 创建FormData
       FormData formData = FormData.fromMap({
-        'image': MultipartFile.fromBytes(
-          imageBytes,
-          filename: 'photo.jpg',
-        ),
+        'image': MultipartFile.fromBytes(imageBytes, filename: 'photo.jpg'),
       });
 
-      // 发送请求
       final response = await _dio.post(
-        '/api/identify',
+        '/api/ingredients/recognize',
         data: formData,
       );
 
-      // 解析响应
       if (response.statusCode == 200) {
-        return IdentifyResult.fromJson(response.data);
+        // 后端统一格式：{"code":200, "data": {"detected_ingredients": [...]}}
+        final data = response.data['data'] as Map<String, dynamic>? ?? {};
+        return IdentifyResult.fromJson(data);
       } else {
         throw Exception('识别失败: ${response.statusCode}');
       }
@@ -86,127 +86,43 @@ class ApiService {
     }
   }
 
-  /// 步骤2: 根据食材生成食谱
-  /// 对应后端接口: POST /api/generate_recipes
-  Future<List<Recipe>> generateRecipes({
+  /// 步骤2: 根据食材生成食谱（含备用菜）
+  /// 对应后端接口: POST /api/recipes/generate
+  Future<GenerateResult> generateRecipes({
     required List<String> ingredients,
     required List<String> allergens,
     required int servings,
     List<String>? preferences,
-    String? customText,
   }) async {
     try {
       final response = await _dio.post(
-        '/api/generate_recipes',
+        '/api/recipes/generate',
         data: {
+          'diners': servings,         // 后端字段名为 diners
           'ingredients': ingredients,
           'allergens': allergens,
-          'servings': servings,
           if (preferences != null) 'preferences': preferences,
-          if (customText != null && customText.isNotEmpty) 'custom_text': customText,
         },
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> recipesJson = response.data['recipes'] ?? [];
-        return recipesJson.map((json) => Recipe.fromJson(json)).toList();
+        // 后端统一格式：{"code":200, "data": {"recipes":[...], "candidates":[...]}}
+        final data = response.data['data'] as Map<String, dynamic>? ?? {};
+
+        final recipes = (data['recipes'] as List<dynamic>? ?? [])
+            .map((json) => Recipe.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        final candidates = (data['candidates'] as List<dynamic>? ?? [])
+            .map((json) => Recipe.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        return GenerateResult(recipes: recipes, candidates: candidates);
       } else {
         throw Exception('生成食谱失败: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('生成食谱失败: $e');
-    }
-  }
-
-  /// 获取单个新食谱（用于无感替换）
-  /// 对应后端接口: POST /api/get_one_recipe
-  Future<Recipe> getOneRecipe({
-    required List<String> excludeIds,
-    required List<String> ingredients,
-    required List<String> allergens,
-    required int servings,
-  }) async {
-    try {
-      final response = await _dio.post(
-        '/api/get_one_recipe',
-        data: {
-          'exclude_ids': excludeIds,
-          'ingredients': ingredients,
-          'allergens': allergens,
-          'servings': servings,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return Recipe.fromJson(response.data['recipe']);
-      } else {
-        throw Exception('获取食谱失败: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('获取食谱失败: $e');
-    }
-  }
-
-  /// 创建/更新用户档案
-  /// 对应后端接口: POST /api/user/profile
-  Future<User> updateUserProfile({
-    required String userId,
-    required String name,
-    required List<String> allergens,
-    required List<String> preferences,
-    required int defaultServings,
-  }) async {
-    try {
-      final response = await _dio.post(
-        '/api/user/profile',
-        data: {
-          'user_id': userId,
-          'name': name,
-          'allergens': allergens,
-          'preferences': preferences,
-          'default_servings': defaultServings,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return User.fromJson(response.data);
-      } else {
-        throw Exception('更新用户档案失败: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('更新用户档案失败: $e');
-    }
-  }
-
-  /// 获取用户档案
-  /// 对应后端接口: GET /api/user/profile/{userId}
-  Future<User> getUserProfile(String userId) async {
-    try {
-      final response = await _dio.get('/api/user/profile/$userId');
-
-      if (response.statusCode == 200) {
-        return User.fromJson(response.data);
-      } else {
-        throw Exception('获取用户档案失败: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('获取用户档案失败: $e');
-    }
-  }
-
-  /// 获取用户历史记录
-  /// 对应后端接口: GET /api/user/history/{userId}
-  Future<List<Map<String, dynamic>>> getUserHistory(String userId) async {
-    try {
-      final response = await _dio.get('/api/user/history/$userId');
-
-      if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data['history'] ?? []);
-      } else {
-        throw Exception('获取历史记录失败: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('获取历史记录失败: $e');
     }
   }
 

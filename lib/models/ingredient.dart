@@ -13,9 +13,19 @@ class Ingredient {
   });
 
   /// 从JSON创建Ingredient对象
+  /// 兼容后端格式：name 为 {"zh": "番茄/西红柿", "en": "Tomato"} 对象
   factory Ingredient.fromJson(Map<String, dynamic> json) {
+    // name 可能是字符串（旧格式）或 {"zh":..., "en":...} 对象（后端格式）
+    String parsedName;
+    final rawName = json['name'];
+    if (rawName is Map) {
+      parsedName = rawName['zh']?.toString() ?? rawName['en']?.toString() ?? '';
+    } else {
+      parsedName = rawName?.toString() ?? '';
+    }
+
     return Ingredient(
-      name: json['name']?.toString() ?? '',
+      name: parsedName,
       count: json['count'] as int? ?? 1,
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
       bbox: (json['bbox'] as List<dynamic>?)
@@ -48,13 +58,16 @@ class IdentifyResult {
   });
 
   /// 从JSON创建IdentifyResult对象
+  /// 后端返回字段：detected_ingredients（非 ingredients）
   factory IdentifyResult.fromJson(Map<String, dynamic> json) {
+    final list = (json['detected_ingredients'] as List<dynamic>?)
+            ?.map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [];
+
     return IdentifyResult(
-      ingredients: (json['ingredients'] as List<dynamic>?)
-              ?.map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      totalItems: json['total_items'] as int? ?? 0,
+      ingredients: list,
+      totalItems: list.length,
       imageHash: json['image_hash']?.toString() ?? '',
     );
   }

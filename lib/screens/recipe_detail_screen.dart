@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/recipe.dart';
 import '../config/theme.dart';
+import '../services/auth_service.dart';
 
 /// 食谱详情页面 - 参考Hungry App的RecipeDetailPage设计
 class RecipeDetailScreen extends StatefulWidget {
@@ -20,6 +21,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late ScrollController _scrollController;
+  final _authService = AuthService.getInstance();
+  bool _isFavoriting = false;
 
   @override
   void initState() {
@@ -59,6 +62,45 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
     }
   }
 
+  /// 处理收藏功能
+  Future<void> _handleFavorite() async {
+    if (!_authService.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先登录')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isFavoriting = true;
+    });
+
+    try {
+      await _authService.addFavorite(
+        recipeName: widget.recipe.name,
+        recipeData: widget.recipe.toJson(),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('收藏成功')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('收藏失败: ${e.toString().replaceAll('Exception: ', '')}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFavoriting = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +130,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
             ),
             actions: [
               IconButton(
-                onPressed: () {},
+                onPressed: _isFavoriting ? null : _handleFavorite,
                 icon: const Icon(Icons.bookmark_border, color: Colors.white),
               ),
             ],
