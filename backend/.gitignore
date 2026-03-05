@@ -1,0 +1,11 @@
+.venv/
+*.pt
+.idea/
+.DS_Store
+.claude/
+.claudeignore
+__pycache__/
+*.pyc
+.env
+*.db
+test_food.jpg
