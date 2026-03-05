@@ -1,8 +1,11 @@
-# 吃啥 APP — 前端应用 / EatWhat APP — Frontend Application
+# 吃啥APP (EatWhat App) 🍽️
 
-> Flutter + YOLO-World 食材识别 + Qwen 大模型菜谱推荐 + 用户认证系统
-> Flutter + YOLO-World Ingredient Recognition + Qwen LLM Recipe Generation + User Authentication
+> 基于 YOLO-World 的智能食材识别 + Qwen 大模型个性化食谱推荐系统
+> 本项目采用前后端合并的单体仓库 (Monorepo) 架构进行统一管理。
 
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue.svg)](https://flutter.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ---
 
 ## 目录 / Table of Contents
