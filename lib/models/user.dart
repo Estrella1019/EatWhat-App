@@ -10,7 +10,7 @@ class User {
   final List<String> allergens; // 过敏原
   final List<String> preferences; // 口味偏好
   final int defaultServings; // 默认就餐人数
-  final String? locale; // 语言偏好 (null=跟随系统, 'zh'=简体中文, 'zh_Hant'=繁体中文, 'en'=英文)
+  final String? locale; // 语言偏好 (null=跟随系统, 'zh'=简体中文, 'en'=英文)
 
   User({
     required this.id,

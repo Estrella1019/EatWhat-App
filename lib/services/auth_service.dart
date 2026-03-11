@@ -101,16 +101,19 @@ class AuthService {
         ).toJson(),
       );
 
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         final authResponse = AuthResponse.fromJson(data);
         await _saveToken(authResponse.accessToken, authResponse.username);
         return authResponse;
       } else {
-        throw Exception('注册失败: ${response.data['message']}');
+        throw Exception(response.data['message']?.toString() ?? '注册失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('注册失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -128,16 +131,19 @@ class AuthService {
         ).toJson(),
       );
 
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         final authResponse = AuthResponse.fromJson(data);
         await _saveToken(authResponse.accessToken, authResponse.username);
         return authResponse;
       } else {
-        throw Exception('登录失败: ${response.data['message']}');
+        throw Exception(response.data['message']?.toString() ?? '登录失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('登录失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -150,15 +156,17 @@ class AuthService {
   Future<UserInfo> getUserInfo() async {
     try {
       final response = await _dio.get('/api/users/me');
-
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         return UserInfo.fromJson(data);
       } else {
-        throw Exception('获取用户信息失败');
+        throw Exception(response.data['message']?.toString() ?? '获取用户信息失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('获取用户信息失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -166,16 +174,18 @@ class AuthService {
   Future<List<Allergen>> getAllergens() async {
     try {
       final response = await _dio.get('/api/users/allergens');
-
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         final list = data['allergens'] as List<dynamic>;
         return list.map((json) => Allergen.fromJson(json as Map<String, dynamic>)).toList();
       } else {
-        throw Exception('获取过敏原失败');
+        throw Exception(response.data['message']?.toString() ?? '获取过敏原失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('获取过敏原失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -186,15 +196,17 @@ class AuthService {
         '/api/users/allergens',
         data: {'name': name},
       );
-
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         return Allergen.fromJson(data);
       } else {
-        throw Exception('添加过敏原失败');
+        throw Exception(response.data['message']?.toString() ?? '添加过敏原失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('添加过敏原失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -202,12 +214,14 @@ class AuthService {
   Future<void> deleteAllergen(int allergenId) async {
     try {
       final response = await _dio.delete('/api/users/allergens/$allergenId');
-
-      if (response.statusCode != 200) {
-        throw Exception('删除过敏原失败');
+      final code = response.data['code'] as int;
+      if (code != 200) {
+        throw Exception(response.data['message']?.toString() ?? '删除过敏原失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('删除过敏原失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -215,16 +229,18 @@ class AuthService {
   Future<List<Favorite>> getFavorites() async {
     try {
       final response = await _dio.get('/api/users/favorites');
-
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         final list = data['favorites'] as List<dynamic>;
         return list.map((json) => Favorite.fromJson(json as Map<String, dynamic>)).toList();
       } else {
-        throw Exception('获取收藏失败');
+        throw Exception(response.data['message']?.toString() ?? '获取收藏失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('获取收藏失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -241,15 +257,17 @@ class AuthService {
           recipeData: recipeData,
         ).toJson(),
       );
-
-      if (response.statusCode == 200) {
+      final code = response.data['code'] as int;
+      if (code == 200) {
         final data = response.data['data'] as Map<String, dynamic>;
         return Favorite.fromJson(data);
       } else {
-        throw Exception('添加收藏失败');
+        throw Exception(response.data['message']?.toString() ?? '添加收藏失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('添加收藏失败: $e');
+      throw Exception('$e');
     }
   }
 
@@ -257,12 +275,14 @@ class AuthService {
   Future<void> deleteFavorite(int favoriteId) async {
     try {
       final response = await _dio.delete('/api/users/favorites/$favoriteId');
-
-      if (response.statusCode != 200) {
-        throw Exception('删除收藏失败');
+      final code = response.data['code'] as int;
+      if (code != 200) {
+        throw Exception(response.data['message']?.toString() ?? '删除收藏失败');
       }
+    } on DioException catch (e) {
+      throw Exception('网络错误: ${e.message}');
     } catch (e) {
-      throw Exception('删除收藏失败: $e');
+      throw Exception('$e');
     }
   }
 }

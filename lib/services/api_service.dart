@@ -67,6 +67,10 @@ class ApiService {
 
       if (response.statusCode == 200) {
         // 后端统一格式：{"code":200, "data": {"detected_ingredients": [...]}}
+        final bodyCode = response.data['code'] as int;
+        if (bodyCode != 200) {
+          throw Exception(response.data['message']?.toString() ?? '识别失败');
+        }
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
         return IdentifyResult.fromJson(data);
       } else {
@@ -93,20 +97,26 @@ class ApiService {
     required List<String> allergens,
     required int servings,
     List<String>? preferences,
+    List<String>? dietary,
   }) async {
     try {
       final response = await _dio.post(
         '/api/recipes/generate',
         data: {
-          'diners': servings,         // 后端字段名为 diners
+          'diners': servings,
           'ingredients': ingredients,
           'allergens': allergens,
+          if (dietary != null && dietary.isNotEmpty) 'dietary': dietary,
           if (preferences != null) 'preferences': preferences,
         },
       );
 
       if (response.statusCode == 200) {
         // 后端统一格式：{"code":200, "data": {"recipes":[...], "candidates":[...]}}
+        final bodyCode = response.data['code'] as int;
+        if (bodyCode != 200) {
+          throw Exception(response.data['message']?.toString() ?? '生成食谱失败');
+        }
         final data = response.data['data'] as Map<String, dynamic>? ?? {};
 
         final recipes = (data['recipes'] as List<dynamic>? ?? [])

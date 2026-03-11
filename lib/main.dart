@@ -65,17 +65,7 @@ class MyMaterialApp extends StatelessWidget {
         // 根据用户设置的语言偏好确定locale
         Locale? locale;
         if (userProvider.user.locale != null) {
-          final localeParts = userProvider.user.locale!.split('_');
-          if (localeParts.length == 2) {
-            // 对于 zh_Hant，使用 scriptCode 而不是 countryCode
-            if (localeParts[0] == 'zh' && localeParts[1] == 'Hant') {
-              locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
-            } else {
-              locale = Locale(localeParts[0], localeParts[1]);
-            }
-          } else {
-            locale = Locale(localeParts[0]);
-          }
+          locale = Locale(userProvider.user.locale!);
           print('设置的 Locale: $locale');
         } else {
           print('使用系统语言');
