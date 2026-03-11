@@ -418,22 +418,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildLanguageOption(
                   context,
                   userProvider,
-                  S.followSystem,
-                  null,
-                ),
-                const SizedBox(height: 8),
-                _buildLanguageOption(
-                  context,
-                  userProvider,
                   S.simplifiedChinese,
                   'zh',
-                ),
-                const SizedBox(height: 8),
-                _buildLanguageOption(
-                  context,
-                  userProvider,
-                  S.traditionalChinese,
-                  'zh_Hant',
                 ),
                 const SizedBox(height: 8),
                 _buildLanguageOption(
