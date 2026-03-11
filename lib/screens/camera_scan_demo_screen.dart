@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 import '../config/theme.dart';
 import '../models/detection_result.dart';
 import '../providers/pantry_provider.dart';
+import '../providers/global_provider.dart';
+import '../providers/user_provider.dart';
+import '../services/media_service.dart';
 import 'pantry_screen.dart';
+import 'result_screen.dart';
 
-/// AR扫描演示页面（简化版，不使用真实摄像头）
+/// AR扫描页面 - 调用后端YOLO识别真实食材
 class CameraScanDemoScreen extends StatefulWidget {
   const CameraScanDemoScreen({super.key});
 
@@ -17,70 +20,66 @@ class CameraScanDemoScreen extends StatefulWidget {
 class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
   List<DetectionResult> _detections = [];
   bool _isScanning = false;
-  Timer? _scanTimer;
+  bool _hasImage = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    // 延迟1秒后开始模拟扫描
-    Future.delayed(const Duration(seconds: 1), () {
-      _startScanning();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _pickAndRecognize();
     });
   }
 
-  @override
-  void dispose() {
-    _scanTimer?.cancel();
-    super.dispose();
-  }
+  /// 选择图片并调用后端YOLO识别
+  Future<void> _pickAndRecognize() async {
+    final mediaService = MediaService();
+    final imageBytes = await mediaService.pickFromGallery();
 
-  /// 开始模拟扫描
-  void _startScanning() {
+    if (imageBytes == null) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
     setState(() {
       _isScanning = true;
+      _hasImage = true;
+      _errorMessage = null;
+      _detections = [];
     });
 
-    // 模拟逐个检测食材
-    int count = 0;
-    _scanTimer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
-      if (count >= _mockDetections.length) {
-        timer.cancel();
-        setState(() {
-          _isScanning = false;
-        });
-        return;
-      }
+    try {
+      final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
+      final ingredients = await globalProvider.identifyIngredientsOnly(
+        imageBytes: imageBytes,
+      );
+
+      final detections = ingredients.map((ingredient) {
+        return DetectionResult(
+          label: ingredient.name,
+          confidence: ingredient.confidence,
+          bbox: ingredient.bbox != null && ingredient.bbox!.length >= 4
+              ? BoundingBox(
+                  x: ingredient.bbox![0],
+                  y: ingredient.bbox![1],
+                  width: ingredient.bbox![2] - ingredient.bbox![0],
+                  height: ingredient.bbox![3] - ingredient.bbox![1],
+                )
+              : BoundingBox(x: 50, y: 50, width: 100, height: 100),
+        );
+      }).toList();
 
       setState(() {
-        _detections.add(_mockDetections[count]);
+        _detections = detections;
+        _isScanning = false;
       });
-      count++;
-    });
+    } catch (e) {
+      setState(() {
+        _isScanning = false;
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      });
+    }
   }
-
-  /// 模拟检测数据
-  final List<DetectionResult> _mockDetections = [
-    DetectionResult(
-      label: '番茄',
-      confidence: 0.95,
-      bbox: BoundingBox(x: 100, y: 150, width: 120, height: 110),
-    ),
-    DetectionResult(
-      label: '鸡蛋',
-      confidence: 0.92,
-      bbox: BoundingBox(x: 250, y: 200, width: 100, height: 90),
-    ),
-    DetectionResult(
-      label: '黄瓜',
-      confidence: 0.88,
-      bbox: BoundingBox(x: 150, y: 350, width: 140, height: 130),
-    ),
-    DetectionResult(
-      label: '五花肉',
-      confidence: 0.90,
-      bbox: BoundingBox(x: 300, y: 100, width: 110, height: 100),
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -88,70 +87,47 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 模拟摄像头预览
           _buildCameraPreview(),
-
-          // AR叠加层
           if (_detections.isNotEmpty) _buildAROverlay(),
-
-          // 顶部栏
           _buildTopBar(),
-
-          // 底部检测列表
-          _buildDetectionList(),
-
-          // 确认按钮
-          if (_detections.isNotEmpty && !_isScanning) _buildConfirmButton(),
+          if (_isScanning) _buildScanningIndicator(),
+          if (_errorMessage != null) _buildErrorView(),
+          if (_detections.isNotEmpty && !_isScanning) _buildDetectionList(),
+          if (_detections.isNotEmpty && !_isScanning) _buildActionButtons(),
         ],
       ),
     );
   }
 
-  /// 模拟摄像头预览
   Widget _buildCameraPreview() {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.grey[800]!,
-            Colors.grey[900]!,
-          ],
+          colors: [Colors.grey[800]!, Colors.grey[900]!],
         ),
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.camera_alt_outlined,
-              size: 100,
-              color: Colors.white.withOpacity(0.3),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              '模拟AR扫描演示',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 18,
+      child: _hasImage
+          ? null
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt_outlined,
+                      size: 100,
+                      color: Colors.white.withValues(alpha: 0.3)),
+                  const SizedBox(height: 20),
+                  Text('请选择图片进行识别',
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 18)),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              '（真实版本需要摄像头权限）',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.3),
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  /// AR叠加层
   Widget _buildAROverlay() {
     return CustomPaint(
       painter: AROverlayPainter(_detections),
@@ -159,7 +135,6 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  /// 顶部栏
   Widget _buildTopBar() {
     return SafeArea(
       child: Padding(
@@ -171,30 +146,12 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
               icon: const Icon(Icons.close, color: Colors.white, size: 32),
               onPressed: () => Navigator.pop(context),
             ),
-            if (_isScanning)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppTheme.secondaryColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      '扫描中...',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
+            if (!_isScanning && _hasImage)
+              TextButton.icon(
+                onPressed: _pickAndRecognize,
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text('重新选图',
+                    style: TextStyle(color: Colors.white)),
               ),
           ],
         ),
@@ -202,18 +159,66 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  /// 底部检测列表
-  Widget _buildDetectionList() {
-    if (_detections.isEmpty) return const SizedBox.shrink();
+  Widget _buildScanningIndicator() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+            SizedBox(height: 16),
+            Text('YOLO识别中...',
+                style: TextStyle(color: Colors.white, fontSize: 16)),
+            SizedBox(height: 4),
+            Text('正在调用后端识别食材',
+                style: TextStyle(color: Colors.white70, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildErrorView() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(_errorMessage!,
+                style: const TextStyle(color: Colors.white),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+                onPressed: _pickAndRecognize, child: const Text('重试')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetectionList() {
     return Positioned(
       left: 0,
       right: 0,
       bottom: 0,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
@@ -225,12 +230,11 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '已检测到 ${_detections.length} 种食材',
+                '已识别到 ${_detections.length} 种食材',
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Wrap(
@@ -243,9 +247,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                       child: Text(
                         '${(detection.confidence * 100).toInt()}%',
                         style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                     label: Text(detection.label),
@@ -253,7 +255,6 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 80), // 为确认按钮留空间
             ],
           ),
         ),
@@ -261,59 +262,102 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  /// 确认按钮
-  Widget _buildConfirmButton() {
+  Widget _buildActionButtons() {
     return Positioned(
       left: 20,
       right: 20,
-      bottom: 40,
+      bottom: 30,
       child: SafeArea(
-        child: ElevatedButton(
-          onPressed: _confirmAndSave,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.secondaryColor,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.check_circle_outline, size: 24),
-              SizedBox(width: 12),
-              Text(
-                '确认并保存到冰箱',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _saveToFridge,
+                icon: const Icon(Icons.kitchen, size: 20),
+                label: const Text('存入冰箱'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppTheme.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _generateRecipes,
+                icon: const Icon(Icons.restaurant_menu, size: 20),
+                label: const Text('生成菜谱'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.secondaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// 确认并保存
-  Future<void> _confirmAndSave() async {
+  Future<void> _saveToFridge() async {
     final pantryProvider = Provider.of<PantryProvider>(context, listen: false);
-
-    // 保存到虚拟冰箱
     await pantryProvider.addFromDetections(_detections);
-
     if (mounted) {
-      // 显示成功提示
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('已添加 ${_detections.length} 种食材到冰箱'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('已添加 ${_detections.length} 种食材到冰箱'),
+        backgroundColor: Colors.green,
+      ));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const PantryScreen()));
+    }
+  }
 
-      // 跳转到冰箱页面
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const PantryScreen()),
+  Future<void> _generateRecipes() async {
+    final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('生成菜谱中...'),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final ingredientNames = _detections.map((d) => d.label).toList();
+      await globalProvider.generateRecipesFromIngredients(
+        ingredients: ingredientNames,
+        allergens: userProvider.user.allergens,
+        servings: userProvider.user.defaultServings,
+        preferences: userProvider.user.preferences,
       );
+      if (mounted) {
+        Navigator.pop(context);
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const ResultScreen()));
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('生成失败: $e')));
+      }
     }
   }
 }
@@ -321,52 +365,38 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
 /// AR叠加层绘制器
 class AROverlayPainter extends CustomPainter {
   final List<DetectionResult> detections;
-
   AROverlayPainter(this.detections);
 
   @override
   void paint(Canvas canvas, Size size) {
     for (var detection in detections) {
       final bbox = detection.bbox;
-
-      // 绘制边界框
       final boxPaint = Paint()
         ..color = AppTheme.detectionBox
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3;
+      canvas.drawRect(
+          Rect.fromLTWH(bbox.x, bbox.y, bbox.width, bbox.height), boxPaint);
 
-      final rect = Rect.fromLTWH(bbox.x, bbox.y, bbox.width, bbox.height);
-      canvas.drawRect(rect, boxPaint);
-
-      // 绘制标签背景
       final labelBgPaint = Paint()..color = AppTheme.detectionLabel;
-
-      final labelText = '${detection.label} ${(detection.confidence * 100).toInt()}%';
+      final labelText =
+          '${detection.label} ${(detection.confidence * 100).toInt()}%';
       final textPainter = TextPainter(
         text: TextSpan(
           text: labelText,
           style: const TextStyle(
-            color: AppTheme.primaryColor,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+              color: AppTheme.primaryColor,
+              fontSize: 14,
+              fontWeight: FontWeight.bold),
         ),
         textDirection: TextDirection.ltr,
       );
       textPainter.layout();
-
-      final labelRect = Rect.fromLTWH(
-        bbox.x,
-        bbox.y - 28,
-        textPainter.width + 16,
-        24,
-      );
       canvas.drawRRect(
-        RRect.fromRectAndRadius(labelRect, const Radius.circular(4)),
-        labelBgPaint,
-      );
-
-      // 绘制标签文字
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(bbox.x, bbox.y - 28, textPainter.width + 16, 24),
+              const Radius.circular(4)),
+          labelBgPaint);
       textPainter.paint(canvas, Offset(bbox.x + 8, bbox.y - 26));
     }
   }

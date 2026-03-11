@@ -1,5 +1,6 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:typed_data';
 import 'dart:io';
 
@@ -38,6 +39,11 @@ class MediaService {
       );
 
       if (image == null) return null;
+
+      // Web平台不支持File和FlutterImageCompress，直接读取字节
+      if (kIsWeb) {
+        return await image.readAsBytes();
+      }
 
       return await _compressImage(image.path);
     } catch (e) {

@@ -77,6 +77,17 @@ class GlobalProvider with ChangeNotifier {
     }
   }
 
+  /// 仅识别食材，不生成菜谱（用于AR扫描界面）
+  Future<List<Ingredient>> identifyIngredientsOnly({
+    required Uint8List imageBytes,
+  }) async {
+    final identifyResult = await _apiService.identifyIngredients(
+      imageBytes: imageBytes,
+    );
+    _identifiedIngredients = identifyResult.ingredients;
+    return _identifiedIngredients;
+  }
+
   /// 换掉指定位置的菜，直接从备用菜中取，无需调用接口
   void replaceRecipe(int index) {
     if (index < 0 || index >= _recipes.length) {
