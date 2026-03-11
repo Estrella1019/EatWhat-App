@@ -79,8 +79,8 @@ class ResultScreen extends StatelessWidget {
                               ),
                             );
                           },
-                          onReplace: () async {
-                            await globalProvider.replaceRecipe(index);
+                          onReplace: () {
+                            globalProvider.replaceRecipe(index);
                           },
                         );
                       },
