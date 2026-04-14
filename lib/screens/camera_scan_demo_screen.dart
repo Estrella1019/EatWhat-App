@@ -243,7 +243,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                 children: _detections.map((detection) {
                   return Chip(
                     avatar: CircleAvatar(
-                      backgroundColor: AppTheme.accentColor,
+                      backgroundColor: AppTheme.primaryContainer,
                       child: Text(
                         '${(detection.confidence * 100).toInt()}%',
                         style: const TextStyle(
@@ -277,7 +277,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                 label: const Text('存入冰箱'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.primaryColor,
+                  foregroundColor: AppTheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -291,7 +291,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                 icon: const Icon(Icons.restaurant_menu, size: 20),
                 label: const Text('生成菜谱'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.secondaryColor,
+                  backgroundColor: AppTheme.primaryContainer,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -385,7 +385,7 @@ class AROverlayPainter extends CustomPainter {
         text: TextSpan(
           text: labelText,
           style: const TextStyle(
-              color: AppTheme.primaryColor,
+              color: AppTheme.textWhite,
               fontSize: 14,
               fontWeight: FontWeight.bold),
         ),

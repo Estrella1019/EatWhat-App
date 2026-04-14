@@ -47,7 +47,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
     if (scrollController.position.hasPixels) {
       if (scrollController.position.pixels > 2.0) {
         setState(() {
-          appBarColor = AppTheme.primaryColor;
+          appBarColor = AppTheme.primary;
         });
       }
       if (scrollController.position.pixels <= 2.0) {
@@ -180,7 +180,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
           Container(
             width: MediaQuery.of(context).size.width,
             padding: const EdgeInsets.only(top: 20, bottom: 30, left: 16, right: 16),
-            color: AppTheme.primaryColor,
+            color: AppTheme.primary,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +260,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
           Container(
             height: 60,
             width: MediaQuery.of(context).size.width,
-            color: AppTheme.secondaryColor,
+            color: AppTheme.primaryContainer,
             child: TabBar(
               controller: _tabController,
               onTap: (index) {
@@ -351,7 +351,7 @@ class _IngredientTile extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
+              color: AppTheme.primary,
               shape: BoxShape.circle,
             ),
           ),
@@ -401,7 +401,7 @@ class _StepTile extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
+              color: AppTheme.primary,
               shape: BoxShape.circle,
             ),
             child: Center(

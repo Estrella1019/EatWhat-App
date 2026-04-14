@@ -6,9 +6,11 @@ import 'config/theme.dart';
 import 'providers/user_provider.dart';
 import 'providers/global_provider.dart';
 import 'providers/pantry_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'services/storage_service.dart';
 import 'services/pantry_service.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_scaffold.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,14 +19,28 @@ void main() async {
   final storage = await StorageService.getInstance();
   final pantryService = await PantryService.getInstance();
 
-  runApp(MyApp(storage: storage, pantryService: pantryService));
+  // 检查登录态
+  final prefs = await SharedPreferences.getInstance();
+  final isLoggedIn = prefs.getString('auth_token') != null;
+
+  runApp(MyApp(
+    storage: storage,
+    pantryService: pantryService,
+    isLoggedIn: isLoggedIn,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final StorageService storage;
   final PantryService pantryService;
+  final bool isLoggedIn;
 
-  const MyApp({super.key, required this.storage, required this.pantryService});
+  const MyApp({
+    super.key,
+    required this.storage,
+    required this.pantryService,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +63,25 @@ class MyApp extends StatelessWidget {
               previous ?? GlobalProvider(userProvider),
         ),
       ],
-      child: const MyMaterialApp(),
+      child: MyMaterialApp(isLoggedIn: isLoggedIn),
     );
   }
 }
 
-class MyMaterialApp extends StatelessWidget {
-  const MyMaterialApp({super.key});
+class MyMaterialApp extends StatefulWidget {
+  final bool isLoggedIn;
+
+  const MyMaterialApp({super.key, required this.isLoggedIn});
+
+  @override
+  State<MyMaterialApp> createState() => _MyMaterialAppState();
+}
+
+class _MyMaterialAppState extends State<MyMaterialApp> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +104,7 @@ class MyMaterialApp extends StatelessWidget {
           key: ValueKey(userProvider.user.locale ?? 'system'),
           title: '吃啥APP',
           theme: AppTheme.getTheme(),
-          home: const HomeScreen(),
+          home: widget.isLoggedIn ? const MainScaffold() : const LoginScreen(),
           debugShowCheckedModeBanner: false,
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,

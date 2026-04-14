@@ -101,11 +101,11 @@ class _RecipeCardState extends State<RecipeCard>
         color: Colors.transparent,
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               boxShadow: AppTheme.cardShadow,
             ),
             child: Column(
@@ -118,8 +118,8 @@ class _RecipeCardState extends State<RecipeCard>
                       tag: 'recipe_${widget.recipe.id}',
                       child: ClipRRect(
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(AppTheme.borderRadiusMedium),
-                          topRight: Radius.circular(AppTheme.borderRadiusMedium),
+                          topLeft: Radius.circular(AppTheme.radiusMd),
+                          topRight: Radius.circular(AppTheme.radiusMd),
                         ),
                         child: Image.network(
                           widget.recipe.imageUrl,

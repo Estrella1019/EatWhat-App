@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         title: Text(
           S.todayEatWhat,
@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                       image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=400&fit=crop'),
                       fit: BoxFit.cover,
                     ),
-                    color: AppTheme.primaryColor,
+                    color: AppTheme.primary,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -88,8 +88,8 @@ class HomeScreen extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppTheme.primaryColor.withOpacity(0.7),
-                          AppTheme.primaryColor.withOpacity(0.9),
+                          AppTheme.primary.withOpacity(0.7),
+                          AppTheme.primary.withOpacity(0.9),
                         ],
                       ),
                     ),

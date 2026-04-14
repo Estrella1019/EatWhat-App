@@ -88,8 +88,8 @@ class PantryScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppTheme.secondaryColor.withOpacity(0.1),
-                AppTheme.accentColor.withOpacity(0.1),
+                AppTheme.primaryContainer.withOpacity(0.1),
+                AppTheme.primary.withOpacity(0.1),
               ],
             ),
           ),
@@ -149,7 +149,7 @@ class PantryScreen extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
-                backgroundColor: AppTheme.secondaryColor,
+                backgroundColor: AppTheme.primaryContainer,
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -173,12 +173,12 @@ class PantryScreen extends StatelessWidget {
   Widget _buildStatItem(BuildContext context, IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, size: 32, color: AppTheme.secondaryColor),
+        Icon(icon, size: 32, color: AppTheme.primaryContainer),
         const SizedBox(height: 8),
         Text(
           value,
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: AppTheme.primaryColor,
+                color: AppTheme.primary,
                 fontWeight: FontWeight.bold,
               ),
         ),
@@ -205,7 +205,7 @@ class PantryScreen extends StatelessWidget {
           child: Text(
             category,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryColor,
+                  color: AppTheme.primary,
                 ),
           ),
         ),
@@ -216,21 +216,21 @@ class PantryScreen extends StatelessWidget {
             return Chip(
               avatar: item.weightInGrams != null
                   ? CircleAvatar(
-                      backgroundColor: AppTheme.secondaryColor.withOpacity(0.2),
+                      backgroundColor: AppTheme.primaryContainer.withOpacity(0.2),
                       child: const Icon(
                         Icons.scale,
                         size: 16,
-                        color: AppTheme.secondaryColor,
+                        color: AppTheme.primaryContainer,
                       ),
                     )
                   : CircleAvatar(
-                      backgroundColor: AppTheme.secondaryColor.withOpacity(0.2),
+                      backgroundColor: AppTheme.primaryContainer.withOpacity(0.2),
                       child: Text(
                         '${item.quantity.toInt()}',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.secondaryColor,
+                          color: AppTheme.primaryContainer,
                         ),
                       ),
                     ),

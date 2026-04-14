@@ -30,7 +30,7 @@ class _FoodWeightDemoScreenState extends State<FoodWeightDemoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('智能重量估算演示'),
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.primary,
       ),
       body: Column(
         children: [
@@ -63,13 +63,13 @@ class _FoodWeightDemoScreenState extends State<FoodWeightDemoScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.primaryColor.withOpacity(0.1),
-            AppTheme.secondaryColor.withOpacity(0.1),
+            AppTheme.primary.withOpacity(0.1),
+            AppTheme.primaryContainer.withOpacity(0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primaryColor.withOpacity(0.3),
+          color: AppTheme.primary.withOpacity(0.3),
         ),
       ),
       child: Column(
@@ -80,12 +80,12 @@ class _FoodWeightDemoScreenState extends State<FoodWeightDemoScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  color: AppTheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.auto_awesome,
-                  color: AppTheme.primaryColor,
+                  color: AppTheme.primary,
                   size: 24,
                 ),
               ),
@@ -296,7 +296,7 @@ class _FoodWeightDemoScreenState extends State<FoodWeightDemoScreen> {
                     onPressed: addedCount > 0 ? () => _goToPantry() : null,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(0, 56),
-                      backgroundColor: AppTheme.secondaryColor,
+                      backgroundColor: AppTheme.primaryContainer,
                       disabledBackgroundColor: Colors.grey[300],
                     ),
                     child: Text(
