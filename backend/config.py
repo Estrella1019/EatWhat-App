@@ -13,6 +13,10 @@ YOLO_MODEL_PATH = os.path.join(DATA_DIR, "yolov8s-world.pt")
 LLM_API_URL = os.getenv("LLM_API_URL", "http://localhost:1234/v1/chat/completions")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen3-14b-mlx")
 
+# YOLO 识别阈值
+YOLO_REVIEW_CONFIDENCE = float(os.getenv("YOLO_REVIEW_CONFIDENCE", "0.25"))
+YOLO_ACCEPTED_CONFIDENCE = float(os.getenv("YOLO_ACCEPTED_CONFIDENCE", "0.45"))
+
 # JWT
 JWT_SECRET = os.getenv("JWT_SECRET", "change-me-in-production")
 JWT_ALGORITHM = "HS256"
