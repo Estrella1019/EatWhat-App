@@ -1,18 +1,84 @@
 import os
 import json
 import io
+from threading import Lock
+
 from PIL import Image
 from ultralytics import YOLO
+
+from config import (
+    INGREDIENTS_JSON_PATH,
+    YOLO_ACCEPTED_CONFIDENCE,
+    YOLO_MODEL_PATH,
+    YOLO_REVIEW_CONFIDENCE,
+)
+
+
+def _normalize_name(value: str) -> str:
+    return "".join(value.lower().split())
+
+
+def aggregate_detections(
+    detections: list[dict],
+    accepted_confidence: float = YOLO_ACCEPTED_CONFIDENCE,
+    review_confidence: float = YOLO_REVIEW_CONFIDENCE,
+) -> dict:
+    grouped: dict[str, dict] = {}
+
+    for detection in detections:
+        confidence = float(detection.get("confidence", 0.0))
+        if confidence < review_confidence:
+            continue
+
+        name_data = detection.get("name", {})
+        zh_name = name_data.get("zh") if isinstance(name_data, dict) else str(name_data)
+        key = _normalize_name(zh_name)
+        if not key:
+            continue
+
+        if key not in grouped:
+            grouped[key] = {
+                "name": detection["name"],
+                "category": detection.get("category"),
+                "confidence": confidence,
+                "bbox": detection.get("bbox"),
+                "count": 0,
+            }
+
+        grouped[key]["count"] += 1
+        if confidence >= grouped[key]["confidence"]:
+            grouped[key]["confidence"] = confidence
+            grouped[key]["bbox"] = detection.get("bbox")
+
+    accepted: list[dict] = []
+    review: list[dict] = []
+
+    for item in grouped.values():
+        payload = {
+            "name": item["name"],
+            "category": item["category"],
+            "confidence": round(float(item["confidence"]), 3),
+            "bbox": item["bbox"],
+            "count": item["count"],
+        }
+        if item["confidence"] >= accepted_confidence:
+            accepted.append(payload)
+        else:
+            review.append({**payload, "status": "needs_confirmation"})
+
+    accepted.sort(key=lambda item: item["confidence"], reverse=True)
+    review.sort(key=lambda item: item["confidence"], reverse=True)
+
+    return {
+        "detected_ingredients": accepted,
+        "review_ingredients": review,
+    }
 
 
 class YoloService:
     def __init__(self):
         print("[YOLO Service] initialization models and diction...")
 
-        # load diction
-        import sys
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-        from config import INGREDIENTS_JSON_PATH, YOLO_MODEL_PATH
         with open(INGREDIENTS_JSON_PATH, 'r', encoding='utf-8') as f:
             ingredient_data = json.load(f)
 
@@ -37,9 +103,9 @@ class YoloService:
     def identify(self, image_bytes: bytes):
         """receive the image byte stream and return the identified JSON list"""
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        results = self.model.predict(image, conf=0.15)
+        results = self.model.predict(image, conf=YOLO_REVIEW_CONFIDENCE)
 
-        detected_ingredients = []
+        raw_detections = []
         for box in results[0].boxes:
             class_id = int(box.cls[0])
             en_name = self.yolo_classes_en[class_id]
@@ -55,9 +121,22 @@ class YoloService:
                 "confidence": round(float(box.conf[0]), 3),
                 "bbox": [round(x, 1) for x in box.xyxy[0].tolist()]
             }
-            detected_ingredients.append(item_data)
+            raw_detections.append(item_data)
 
-        return detected_ingredients
+        return aggregate_detections(raw_detections)
 
 
-yolo_app = YoloService()
+_yolo_service: YoloService | None = None
+_yolo_lock = Lock()
+
+
+def get_yolo_service() -> YoloService:
+    global _yolo_service
+    if _yolo_service is None:
+        with _yolo_lock:
+            if _yolo_service is None:
+                try:
+                    _yolo_service = YoloService()
+                except Exception as exc:
+                    raise RuntimeError(f"食材识别服务初始化失败: {exc}") from exc
+    return _yolo_service

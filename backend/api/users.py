@@ -1,6 +1,8 @@
 import json
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from api.response_utils import ok
 from database import get_db
 from models import User, Allergen, Favorite
 from schemas.user import AllergenCreate, AllergenOut, FavoriteCreate, FavoriteOut
@@ -9,20 +11,12 @@ from services.auth_service import get_current_user_id
 router = APIRouter()
 
 
-def ok(data):
-    return {"code": 200, "message": "success", "data": data}
-
-
-def err(code: int, message: str):
-    return {"code": code, "message": message, "data": None}
-
-
 @router.get("/users/me")
 def get_me(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """Get currently logged-in user information"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        return err(404, "用户不存在")
+        raise HTTPException(status_code=404, detail="用户不存在")
     return ok({"id": user.id, "username": user.username, "email": user.email})
 
 
@@ -45,6 +39,14 @@ def add_allergen(
     db: Session = Depends(get_db),
 ):
     """Add allergen"""
+    existing = (
+        db.query(Allergen)
+        .filter(Allergen.user_id == user_id, Allergen.name == req.name)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="过敏原已存在")
+
     allergen = Allergen(user_id=user_id, name=req.name)
     db.add(allergen)
     db.commit()
@@ -65,7 +67,7 @@ def delete_allergen(
         .first()
     )
     if not allergen:
-        return err(404, "过敏原不存在")
+        raise HTTPException(status_code=404, detail="过敏原不存在")
     db.delete(allergen)
     db.commit()
     return ok(None)
@@ -97,6 +99,14 @@ def add_favorite(
     db: Session = Depends(get_db),
 ):
     """Save a recipe"""
+    existing = (
+        db.query(Favorite)
+        .filter(Favorite.user_id == user_id, Favorite.recipe_name == req.recipe_name)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="该菜谱已收藏")
+
     favorite = Favorite(
         user_id=user_id,
         recipe_name=req.recipe_name,
@@ -126,7 +136,7 @@ def delete_favorite(
         .first()
     )
     if not favorite:
-        return err(404, "收藏不存在")
+        raise HTTPException(status_code=404, detail="收藏不存在")
     db.delete(favorite)
     db.commit()
     return ok(None)

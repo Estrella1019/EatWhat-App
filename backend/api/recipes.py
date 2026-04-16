@@ -1,32 +1,24 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import List, Optional
-from services.llm_service import llm_app
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException
+
+from api.response_utils import ok
+from schemas.recipe_generation import GenerateRequest
+from services.llm_service import get_llm_service
 
 router = APIRouter()
-
-
-def ok(data):
-    return {"code": 200, "message": "success", "data": data}
-
-
-def err(code: int, message: str):
-    return {"code": code, "message": message, "data": None}
-
-
-class GenerateRequest(BaseModel):
-    diners: int
-    ingredients: List[str]
-    dietary: Optional[List[str]] = []
-    allergens: Optional[List[str]] = []
-    preferences: Optional[List[str]] = []
 
 
 @router.post("/recipes/generate")
 def generate_recipes(req: GenerateRequest):
     """Call Qwen to generate recipes based on ingredients and dining information"""
     try:
-        result = llm_app.generate_menu(
+        service = get_llm_service()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+
+    try:
+        result = service.generate_menu(
             diners=req.diners,
             ingredients=req.ingredients,
             dietary=req.dietary,
@@ -34,7 +26,7 @@ def generate_recipes(req: GenerateRequest):
             preferences=req.preferences,
         )
     except RuntimeError as e:
-        return err(500, str(e))
+        raise HTTPException(status_code=502, detail=str(e)) from e
 
     return ok(result)
 
