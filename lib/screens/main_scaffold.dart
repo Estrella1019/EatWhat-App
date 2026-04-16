@@ -5,7 +5,7 @@ import 'pantry_screen.dart';
 import 'favorites_screen.dart';
 import 'profile_screen.dart';
 
-/// 主框架 - 底部导航栏
+/// 主框架 - 底部导航栏 (Figma Harvest Warm 设计)
 class MainScaffold extends StatefulWidget {
   final int initialIndex;
 
@@ -38,45 +38,56 @@ class _MainScaffoldState extends State<MainScaffold> {
         index: _currentIndex,
         children: _screens,
       ),
+      // ── Figma风格底部导航栏 ──
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.textPrimary.withOpacity(0.06),
-              blurRadius: 24,
-              offset: const Offset(0, -4),
+          color: AppTheme.background.withOpacity(0.95),
+          border: Border(
+            top: BorderSide(
+              color: AppTheme.outline.withOpacity(0.15),
+              width: 0.5,
             ),
-          ],
+          ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.restaurant_menu,
-                  label: 'Scan',
-                  index: 0,
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Tab Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(
+                      icon: Icons.photo_camera_outlined,
+                      activeIcon: Icons.photo_camera,
+                      label: 'Scan',
+                      index: 0,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.inventory_2_outlined,
+                      activeIcon: Icons.inventory_2,
+                      label: 'Pantry',
+                      index: 1,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.favorite_outline,
+                      activeIcon: Icons.favorite,
+                      label: 'Favorites',
+                      index: 2,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.person_outline,
+                      activeIcon: Icons.person,
+                      label: 'Profile',
+                      index: 3,
+                    ),
+                  ],
                 ),
-                _buildNavItem(
-                  icon: Icons.kitchen,
-                  label: 'Pantry',
-                  index: 1,
-                ),
-                _buildNavItem(
-                  icon: Icons.favorite,
-                  label: 'Favorites',
-                  index: 2,
-                ),
-                _buildNavItem(
-                  icon: Icons.person,
-                  label: 'Profile',
-                  index: 3,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -85,6 +96,7 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   Widget _buildNavItem({
     required IconData icon,
+    required IconData activeIcon,
     required String label,
     required int index,
   }) {
@@ -96,11 +108,12 @@ class _MainScaffoldState extends State<MainScaffold> {
           _currentIndex = index;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primaryContainer.withOpacity(0.15)
+              ? AppTheme.primaryFixed.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
         ),
@@ -108,18 +121,19 @@ class _MainScaffoldState extends State<MainScaffold> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
+              isSelected ? activeIcon : icon,
               color: isSelected ? AppTheme.primary : AppTheme.textHint,
               size: 24,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? AppTheme.primary : AppTheme.textHint,
                 fontFamily: 'Inter',
+                letterSpacing: 0.5,
               ),
             ),
           ],

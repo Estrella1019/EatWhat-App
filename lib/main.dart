@@ -19,9 +19,10 @@ void main() async {
   final storage = await StorageService.getInstance();
   final pantryService = await PantryService.getInstance();
 
-  // 检查登录态
+  // 检查登录态（临时跳过登录，直接进入主界面查看UI效果）
   final prefs = await SharedPreferences.getInstance();
-  final isLoggedIn = prefs.getString('auth_token') != null;
+  // final isLoggedIn = prefs.getString('auth_token') != null;
+  final isLoggedIn = true; // TODO: 恢复登录检查
 
   runApp(MyApp(
     storage: storage,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/favorite.dart';
 import '../services/auth_service.dart';
+import '../config/theme.dart';
 import 'recipe_detail_screen.dart';
 
-/// 收藏列表界面
+/// 收藏列表界面 — Figma Harvest Warm 设计稿
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
@@ -49,13 +50,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       await _loadFavorites();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已取消收藏')),
+          SnackBar(
+            content: const Text('Removed from favorites'),
+            backgroundColor: AppTheme.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除失败: $e')),
+          SnackBar(content: Text('Failed to delete: $e')),
         );
       }
     }
@@ -64,90 +72,309 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的收藏'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadFavorites,
-                        child: const Text('重试'),
-                      ),
-                    ],
+      backgroundColor: AppTheme.background,
+      body: Column(
+        children: [
+          // ── 顶部导航栏 (Figma风格) ──
+          _buildNavBar(context),
+          // ── Editorial Header ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'CURATED HARVEST',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: AppTheme.secondary,
+                    fontFamily: 'Inter',
                   ),
-                )
-              : _favorites.isEmpty
-                  ? const Center(
-                      child: Text('还没有收藏任何菜谱'),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadFavorites,
-                      child: ListView.builder(
-                        itemCount: _favorites.length,
-                        itemBuilder: (context, index) {
-                          final favorite = _favorites[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                favorite.recipeName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Text(
-                                '收藏于 ${_formatDate(favorite.createdAt)}',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('确认删除'),
-                                      content: const Text('确定要取消收藏这道菜吗？'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: const Text('取消'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            _deleteFavorite(favorite.id);
-                                          },
-                                          child: const Text('删除'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RecipeDetailScreen(
-                                      recipe: favorite.recipeData,
-                                    ),
-                                  ),
-                                );
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Your Favorites',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                    fontFamily: 'Manrope',
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'A personal collection of your most cherished culinary discoveries.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                    fontFamily: 'Inter',
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── Content ──
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+                : _errorMessage != null
+                    ? _buildErrorState()
+                    : _favorites.isEmpty
+                        ? _buildEmptyState()
+                        : RefreshIndicator(
+                            onRefresh: _loadFavorites,
+                            color: AppTheme.primary,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              itemCount: _favorites.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                return _buildFavoriteCard(_favorites[index]);
                               },
                             ),
-                          );
-                        },
+                          ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavBar(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.background.withOpacity(0.95),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.outline.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SizedBox(
+            height: 44,
+            child: Row(
+              children: [
+                const Spacer(),
+                const Text(
+                  'EATWHAT',
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    fontFamily: 'Manrope',
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined,
+                      color: AppTheme.primary, size: 22),
+                  onPressed: () {
+                    // TODO: 设置页面
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteCard(Favorite favorite) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      elevation: 0,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecipeDetailScreen(recipe: favorite.recipeData),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1B1C1A).withOpacity(0.04),
+                blurRadius: 32,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Thumbnail
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  color: AppTheme.surfaceContainer,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  child: favorite.recipeData.imageUrl.isNotEmpty
+                      ? Image.network(
+                          favorite.recipeData.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.restaurant,
+                            color: AppTheme.primary,
+                          ),
+                        )
+                      : const Icon(Icons.restaurant, color: AppTheme.primary),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      favorite.recipeName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                        fontFamily: 'Manrope',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(favorite.createdAt),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                        fontFamily: 'Inter',
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              // Delete button
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppTheme.errorContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 18,
+                  icon: const Icon(Icons.delete, color: AppTheme.error),
+                  onPressed: () => _showDeleteDialog(favorite),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(Favorite favorite) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
+        title: const Text(
+          'Remove Favorite',
+          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
+        ),
+        content: const Text(
+          'Are you sure you want to remove this recipe from favorites?',
+          style: TextStyle(fontFamily: 'Inter'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteFavorite(favorite.id);
+            },
+            child: const Text(
+              'Remove',
+              style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.favorite_border, size: 80, color: AppTheme.outline.withOpacity(0.3)),
+          const SizedBox(height: 24),
+          const Text(
+            'No favorites yet',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+              fontFamily: 'Manrope',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start saving recipes you love',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+          const SizedBox(height: 16),
+          Text(_errorMessage!, style: const TextStyle(color: AppTheme.error)),
+          const SizedBox(height: 16),
+          GradientButton(
+            label: 'Retry',
+            onPressed: _loadFavorites,
+            width: 120,
+          ),
+        ],
+      ),
     );
   }
 

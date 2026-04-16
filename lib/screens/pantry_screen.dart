@@ -6,33 +6,75 @@ import '../providers/user_provider.dart';
 import '../config/theme.dart';
 import 'result_screen.dart';
 
-/// 虚拟冰箱页面
+/// 虚拟冰箱页面 — Figma Harvest Warm 设计稿
 class PantryScreen extends StatelessWidget {
   const PantryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final pantryProvider = Provider.of<PantryProvider>(context);
-    final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的冰箱'),
-        actions: [
-          if (pantryProvider.items.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showClearDialog(context, pantryProvider),
-              tooltip: '清空冰箱',
-            ),
+      backgroundColor: AppTheme.background,
+      body: Column(
+        children: [
+          // ── 顶部导航栏 (Figma风格) ──
+          _buildNavBar(context),
+          // ── 内容区域 ──
+          Expanded(
+            child: pantryProvider.isLoading
+                ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+                : pantryProvider.items.isEmpty
+                    ? _buildEmptyState(context)
+                    : _buildPantryContent(context, pantryProvider),
+          ),
         ],
       ),
-      body: pantryProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : pantryProvider.items.isEmpty
-              ? _buildEmptyState(context)
-              : _buildPantryContent(context, pantryProvider, globalProvider, userProvider),
+    );
+  }
+
+  Widget _buildNavBar(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.background.withOpacity(0.95),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.outline.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SizedBox(
+            height: 44,
+            child: Row(
+              children: [
+                const Spacer(),
+                const Text(
+                  'EATWHAT',
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    fontFamily: 'Manrope',
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep, color: AppTheme.primary, size: 22),
+                  onPressed: () {
+                    // TODO: 批量清空功能
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -45,19 +87,26 @@ class PantryScreen extends StatelessWidget {
           Icon(
             Icons.kitchen_outlined,
             size: 100,
-            color: Colors.grey[300],
+            color: AppTheme.outline.withOpacity(0.3),
           ),
           const SizedBox(height: 24),
-          Text(
-            '冰箱空空如也',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
+          const Text(
+            'Your pantry is empty',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.textPrimary,
+              fontFamily: 'Manrope',
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            '使用AR扫描添加食材吧',
-            style: Theme.of(context).textTheme.bodyMedium,
+            'Use AR scan to add ingredients',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+              fontFamily: 'Inter',
+            ),
           ),
         ],
       ),
@@ -65,12 +114,7 @@ class PantryScreen extends StatelessWidget {
   }
 
   /// 冰箱内容
-  Widget _buildPantryContent(
-    BuildContext context,
-    PantryProvider pantryProvider,
-    GlobalProvider globalProvider,
-    UserProvider userProvider,
-  ) {
+  Widget _buildPantryContent(BuildContext context, PantryProvider pantryProvider) {
     // 按分类分组
     final Map<String, List> groupedItems = {};
     for (var item in pantryProvider.items) {
@@ -82,85 +126,147 @@ class PantryScreen extends StatelessWidget {
 
     return Column(
       children: [
-        // 统计信息
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppTheme.primaryContainer.withOpacity(0.1),
-                AppTheme.primary.withOpacity(0.1),
-              ],
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem(
-                context,
-                Icons.inventory_2_outlined,
-                '${pantryProvider.itemCount}',
-                '种食材',
-              ),
-              _buildStatItem(
-                context,
-                Icons.category_outlined,
-                '${groupedItems.length}',
-                '个分类',
-              ),
-            ],
-          ),
-        ),
-
-        // 食材列表
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: groupedItems.length,
-            itemBuilder: (context, index) {
-              final category = groupedItems.keys.elementAt(index);
-              final items = groupedItems[category]!;
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              const SizedBox(height: 16),
 
-              return _buildCategorySection(context, category, items, pantryProvider);
-            },
+              // ── Stats Banner ──
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceLow,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                ),
+                child: Stack(
+                  children: [
+                    // Background icon
+                    Positioned(
+                      right: -24,
+                      top: -24,
+                      child: Icon(
+                        Icons.kitchen,
+                        size: 120,
+                        color: AppTheme.textPrimary.withOpacity(0.05),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'CURRENT INVENTORY',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                            color: AppTheme.secondary,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _buildStatValue('${pantryProvider.itemCount}', 'INGREDIENTS'),
+                            Container(
+                              width: 1,
+                              height: 40,
+                              margin: const EdgeInsets.symmetric(horizontal: 24),
+                              color: AppTheme.outline.withOpacity(0.2),
+                            ),
+                            _buildStatValue('${groupedItems.length}', 'CATEGORIES'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // ── Category Filter Chips ──
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: groupedItems.keys.map((category) {
+                  return _CategoryChip(
+                    label: category,
+                    onRemove: () {
+                      // TODO: 分类筛选移除功能
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+
+              // ── Item Cards Grid ──
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.3,
+                ),
+                itemCount: pantryProvider.items.length,
+                itemBuilder: (context, index) {
+                  final item = pantryProvider.items[index];
+                  return _buildItemCard(context, item, pantryProvider);
+                },
+              ),
+              const SizedBox(height: 120), // Space for FAB
+            ],
           ),
         ),
 
-        // 底部按钮
+        // ── Floating Cook Button ──
         Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
           child: SafeArea(
-            child: ElevatedButton(
-              onPressed: () => _cookWithPantry(
-                context,
-                pantryProvider,
-                globalProvider,
-                userProvider,
-              ),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: AppTheme.primaryContainer,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.restaurant_menu),
-                  SizedBox(width: 12),
-                  Text(
-                    '用这些食材做菜',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            top: false,
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withOpacity(0.3),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () => _cookWithPantry(context, pantryProvider),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                    ),
                   ),
-                ],
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
+                      SizedBox(width: 12),
+                      Text(
+                        'COOK WITH THESE INGREDIENTS',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                          fontFamily: 'Manrope',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -169,92 +275,110 @@ class PantryScreen extends StatelessWidget {
     );
   }
 
-  /// 统计项
-  Widget _buildStatItem(BuildContext context, IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(icon, size: 32, color: AppTheme.primaryContainer),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
-    );
-  }
-
-  /// 分类区块
-  Widget _buildCategorySection(
-    BuildContext context,
-    String category,
-    List items,
-    PantryProvider pantryProvider,
-  ) {
+  Widget _buildStatValue(String value, String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(
-            category,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primary,
-                ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.primary,
+            fontFamily: 'Manrope',
           ),
         ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: items.map((item) {
-            return Chip(
-              avatar: item.weightInGrams != null
-                  ? CircleAvatar(
-                      backgroundColor: AppTheme.primaryContainer.withOpacity(0.2),
-                      child: const Icon(
-                        Icons.scale,
-                        size: 16,
-                        color: AppTheme.primaryContainer,
-                      ),
-                    )
-                  : CircleAvatar(
-                      backgroundColor: AppTheme.primaryContainer.withOpacity(0.2),
-                      child: Text(
-                        '${item.quantity.toInt()}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryContainer,
-                        ),
-                      ),
-                    ),
-              label: Text(item.displayText),
-              deleteIcon: const Icon(Icons.close, size: 18),
-              onDeleted: () => pantryProvider.removeItem(item.id),
-              backgroundColor: Colors.white,
-              side: BorderSide(color: Colors.grey[300]!),
-            );
-          }).toList(),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textSecondary,
+            letterSpacing: 0.5,
+            fontFamily: 'Inter',
+          ),
         ),
-        const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildItemCard(BuildContext context, dynamic item, PantryProvider pantryProvider) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Icon placeholder
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                ),
+                child: const Center(
+                  child: Icon(Icons.eco, color: AppTheme.primary, size: 24),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => pantryProvider.removeItem(item.id),
+                child: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: AppTheme.error.withOpacity(0.4),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            item.displayText,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+              fontFamily: 'Inter',
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            item.weightInGrams != null
+                ? '${item.weightInGrams}g'
+                : '${item.quantity.toInt()} Items',
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textSecondary,
+              letterSpacing: 0.5,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   /// 用冰箱食材做菜
-  Future<void> _cookWithPantry(
-    BuildContext context,
-    PantryProvider pantryProvider,
-    GlobalProvider globalProvider,
-    UserProvider userProvider,
-  ) async {
-    // 显示加载对话框
+  Future<void> _cookWithPantry(BuildContext context, PantryProvider pantryProvider) async {
+    final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -265,9 +389,9 @@ class PantryScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
+                CircularProgressIndicator(color: AppTheme.primary),
                 SizedBox(height: 16),
-                Text('正在生成食谱...'),
+                Text('Generating recipes...'),
               ],
             ),
           ),
@@ -276,10 +400,7 @@ class PantryScreen extends StatelessWidget {
     );
 
     try {
-      // 获取食材名称列表
       final ingredients = pantryProvider.getIngredientNames();
-
-      // 调用生成食谱API（使用Mock）
       await globalProvider.generateRecipesFromIngredients(
         ingredients: ingredients,
         allergens: userProvider.user.allergens,
@@ -287,48 +408,62 @@ class PantryScreen extends StatelessWidget {
         preferences: userProvider.user.preferences,
       );
 
-      // 关闭加载对话框
       if (context.mounted) {
         Navigator.pop(context);
-
-        // 跳转到结果页
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ResultScreen()),
         );
       }
     } catch (e) {
-      // 关闭加载对话框
       if (context.mounted) {
         Navigator.pop(context);
-
-        // 显示错误
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('生成食谱失败: $e')),
+          SnackBar(content: Text('Failed to generate recipes: $e')),
         );
       }
     }
   }
+}
 
-  /// 显示清空确认对话框
-  void _showClearDialog(BuildContext context, PantryProvider pantryProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('清空冰箱'),
-        content: const Text('确定要清空所有食材吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+/// Figma风格分类标签
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onRemove;
+
+  const _CategoryChip({required this.label, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 14, right: 4, top: 8, bottom: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textGreen,
+              fontFamily: 'Inter',
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              pantryProvider.clearAll();
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('清空'),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: AppTheme.error.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 14, color: AppTheme.error),
+            ),
           ),
         ],
       ),

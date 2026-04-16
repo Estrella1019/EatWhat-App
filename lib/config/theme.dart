@@ -37,6 +37,34 @@ class AppTheme {
   /// 分割线 / 边框
   static const Color outline = Color(0xFFD6C4B1);
 
+  // ── 辅助色（来自Figma设计系统）────────────────
+  /// 绿色 — secondary
+  static const Color secondary = Color(0xFF4A6640);
+  /// 浅绿 — secondary container
+  static const Color secondaryContainer = Color(0xFFC8E9B9);
+  /// 浅绿底色
+  static const Color secondaryLight = Color(0xFFCBECBC);
+  /// 浅橙桃 — primary fixed
+  static const Color primaryFixed = Color(0xFFFFDDB6);
+  /// 浅橙桃暗色
+  static const Color primaryFixedDim = Color(0xFFFFB95B);
+  /// 三底色
+  static const Color tertiary = Color(0xFF665E4C);
+  /// 三底色容器
+  static const Color tertiaryContainer = Color(0xFFB6AC98);
+
+  // ── 表面色（来自Figma设计系统）────────────────
+  /// 最暗表面
+  static const Color surfaceDim = Color(0xFFDBDAD6);
+  /// 最高容器
+  static const Color surfaceHighest = Color(0xFFE4E2DE);
+  /// 低容器
+  static const Color surfaceLowest = Color(0xFFFFFFFF);
+
+  // ── 文字功能色 ───────────────────────────────
+  /// 次级文字
+  static const Color textGreen = Color(0xFF4E6A44);
+
   // ── AR 扫描专用 ───────────────────────────────
   static const Color scanOverlay = Color(0x80000000);
   static const Color detectionBox = Color(0xFFE3A043);
@@ -47,6 +75,7 @@ class AppTheme {
   static const double radiusMd = 12.0;
   static const double radiusLg = 16.0;
   static const double radiusXl = 24.0;
+  static const double radiusXxl = 32.0;
   static const double radiusFull = 999.0;
 
   // ── 阴影 ──────────────────────────────────────
@@ -240,6 +269,7 @@ class GradientButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final double? width;
+  final double height;
   final IconData? icon;
 
   const GradientButton({
@@ -248,6 +278,7 @@ class GradientButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.width,
+    this.height = 52,
     this.icon,
   });
 
@@ -255,15 +286,15 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
-      height: 52,
+      height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: onPressed == null
+          gradient: onPressed == null || isLoading
               ? null
               : AppTheme.primaryGradient,
-          color: onPressed == null ? AppTheme.outline : null,
+          color: (onPressed == null || isLoading) ? AppTheme.outline : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-          boxShadow: onPressed == null ? [] : AppTheme.buttonShadow,
+          boxShadow: (onPressed == null || isLoading) ? [] : AppTheme.buttonShadow,
         ),
         child: ElevatedButton(
           onPressed: isLoading ? null : onPressed,
@@ -301,6 +332,179 @@ class GradientButton extends StatelessWidget {
                     ),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Figma风格顶部导航栏
+class FigmaAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+  final bool showBackButton;
+  final Widget? leading;
+  final Widget? trailing;
+  final bool centerTitle;
+  final double elevation;
+
+  const FigmaAppBar({
+    super.key,
+    this.title,
+    this.showBackButton = false,
+    this.leading,
+    this.trailing,
+    this.centerTitle = true,
+    this.elevation = 0,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(56);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.background.withOpacity(0.9),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.outline.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SizedBox(
+            height: 44,
+            child: Row(
+              children: [
+                if (showBackButton)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: AppTheme.primary, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                else if (leading != null)
+                  leading!
+                else
+                  const SizedBox(width: 48),
+                if (centerTitle)
+                  const Spacer(),
+                if (title != null)
+                  Text(
+                    title!,
+                    style: const TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                      fontFamily: 'Manrope',
+                    ),
+                  ),
+                if (centerTitle)
+                  const Spacer(),
+                if (trailing != null)
+                  trailing!
+                else
+                  const SizedBox(width: 48),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 分段标签组件（Figma风格）
+class SectionLabel extends StatelessWidget {
+  final String text;
+
+  const SectionLabel(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.textHint,
+          letterSpacing: 1.5,
+          fontFamily: 'Inter',
+        ),
+      ),
+    );
+  }
+}
+
+/// 偏好标签组件
+class PrefLabel extends StatelessWidget {
+  final String text;
+
+  const PrefLabel(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppTheme.textSecondary,
+        letterSpacing: 1.5,
+        fontFamily: 'Inter',
+      ),
+    );
+  }
+}
+
+/// Figma风格ListTile设置行
+class SettingsRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+  final Widget? trailing;
+
+  const SettingsRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onTap,
+    this.iconColor,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor ?? AppTheme.textSecondary, size: 22),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppTheme.textPrimary,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            trailing ??
+                const Icon(Icons.arrow_forward_ios,
+                    color: AppTheme.textHint, size: 14),
+          ],
         ),
       ),
     );

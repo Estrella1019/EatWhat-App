@@ -16,7 +16,7 @@ class ApiService {
   static ApiService? _instance;
   late Dio _dio;
 
-  static const String _baseUrl = 'http://localhost:8000';
+  static const String _baseUrl = 'http://192.168.31.65:8000';
 
   ApiService._() {
     _dio = Dio(BaseOptions(

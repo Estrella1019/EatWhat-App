@@ -8,7 +8,7 @@ import 'profiles_management_screen.dart';
 import 'profile_edit_screen.dart';
 import 'login_screen.dart';
 
-/// 个人档案页面 — Harvest Warm 设计风格
+/// 个人档案页面 — Figma Harvest Warm 设计风格
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -73,139 +73,164 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Top Bar ──────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  const SizedBox(width: 48),
-                  const Expanded(
-                    child: Text(
-                      'EATWHAT',
-                      textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          // ── 顶部导航栏 (Figma风格) ──
+          _buildNavBar(context),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              children: [
+                const SizedBox(height: 16),
+
+                // ── Avatar Card ──
+                _buildAvatarCard(userProvider),
+                const SizedBox(height: 16),
+
+                // ── Stats Row ──
+                _buildStatsRow(),
+                const SizedBox(height: 24),
+
+                // ── User Settings Section ──
+                const SectionLabel('USER SETTINGS'),
+                const SizedBox(height: 8),
+                _buildSettingsCard(context),
+                const SizedBox(height: 24),
+
+                // ── Preferences Section ──
+                Row(
+                  children: const [
+                    Icon(Icons.tune, color: AppTheme.primary, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'Preferences',
                       style: TextStyle(
-                        color: AppTheme.primary,
-                        fontSize: 14,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 2,
+                        color: AppTheme.textPrimary,
                         fontFamily: 'Manrope',
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLow,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined,
-                        color: AppTheme.primary, size: 22),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  const SizedBox(height: 8),
-
-                  // ── Avatar Card ───────────────────────
-                  _buildAvatarCard(userProvider),
-                  const SizedBox(height: 16),
-
-                  // ── Stats Row ─────────────────────────
-                  _buildStatsRow(),
-                  const SizedBox(height: 24),
-
-                  // ── User Settings Section ─────────────
-                  _sectionLabel('USER SETTINGS'),
-                  const SizedBox(height: 8),
-                  _buildSettingsCard(context),
-                  const SizedBox(height: 24),
-
-                  // ── Preferences Section ───────────────
-                  Row(
-                    children: const [
-                      Icon(Icons.tune, color: AppTheme.primary, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        'Preferences',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                          fontFamily: 'Manrope',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Username
+                      const PrefLabel('USERNAME'),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter your username',
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Allergy Filters
+                      const PrefLabel('ALLERGY FILTERS'),
+                      const SizedBox(height: 10),
+                      _buildAllergenChips(userProvider, S),
+                      const SizedBox(height: 20),
+
+                      // Taste Preferences
+                      const PrefLabel('TASTE PREFERENCES'),
+                      const SizedBox(height: 10),
+                      _buildTasteChips(userProvider, S),
+                      const SizedBox(height: 20),
+
+                      // Servings
+                      const PrefLabel('SERVINGS'),
+                      const SizedBox(height: 10),
+                      _buildServingsRow(userProvider),
+                      const SizedBox(height: 20),
+
+                      // Language
+                      const PrefLabel('LANGUAGE'),
+                      const SizedBox(height: 10),
+                      _buildLanguageToggle(userProvider),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                ),
+                const SizedBox(height: 24),
 
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceLow,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Username
-                        _prefLabel('USERNAME'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter your username',
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                // ── Account Section ──
+                const SectionLabel('ACCOUNT'),
+                const SizedBox(height: 8),
+                _buildAccountCard(context, S),
+                const SizedBox(height: 24),
 
-                        // Allergy Filters
-                        _prefLabel('ALLERGY FILTERS'),
-                        const SizedBox(height: 10),
-                        _buildAllergenChips(userProvider, S),
-                        const SizedBox(height: 20),
-
-                        // Taste Preferences
-                        _prefLabel('TASTE PREFERENCES'),
-                        const SizedBox(height: 10),
-                        _buildTasteChips(userProvider, S),
-                        const SizedBox(height: 20),
-
-                        // Servings
-                        _prefLabel('SERVINGS'),
-                        const SizedBox(height: 10),
-                        _buildServingsRow(userProvider),
-                        const SizedBox(height: 20),
-
-                        // Language
-                        _prefLabel('LANGUAGE'),
-                        const SizedBox(height: 10),
-                        _buildLanguageToggle(userProvider),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ── Account Section ───────────────────
-                  _sectionLabel('ACCOUNT'),
-                  const SizedBox(height: 8),
-                  _buildAccountCard(context, S),
-                  const SizedBox(height: 24),
-
-                  // ── Update Profile Button ─────────────
-                  GradientButton(
-                    label: 'Update Profile',
-                    onPressed: () => _handleSave(userProvider),
-                    isLoading: _isSaving,
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                // ── Update Profile Button ──
+                GradientButton(
+                  label: 'Update Profile',
+                  onPressed: () => _handleSave(userProvider),
+                  isLoading: _isSaving,
+                ),
+                const SizedBox(height: 32),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavBar(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.background.withOpacity(0.95),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.outline.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SizedBox(
+            height: 44,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: AppTheme.primary, size: 20),
+                  onPressed: () {
+                    // 返回主Tab（不退出Profile Tab，只是隐藏）
+                  },
+                ),
+                const Spacer(),
+                const Text(
+                  'EATWHAT',
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    fontFamily: 'Manrope',
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined,
+                      color: AppTheme.primary, size: 22),
+                  onPressed: () {
+                    // TODO: 设置页面
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -333,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          _settingsRow(
+          SettingsRow(
             icon: Icons.person_outline,
             label: 'Edit Profile',
             onTap: () => Navigator.push(
@@ -342,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           Divider(height: 1, color: AppTheme.outline.withOpacity(0.4), indent: 52),
-          _settingsRow(
+          SettingsRow(
             icon: Icons.people_outline,
             label: 'Profile Management',
             onTap: () => Navigator.push(
@@ -351,38 +376,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _settingsRow({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          children: [
-            Icon(icon, color: AppTheme.textSecondary, size: 20),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: AppTheme.textPrimary,
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios,
-                color: AppTheme.textHint, size: 14),
-          ],
-        ),
       ),
     );
   }
@@ -418,8 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isSelected) ...[
-                    const Icon(Icons.check,
-                        size: 13, color: AppTheme.primary),
+                    const Icon(Icons.check, size: 13, color: AppTheme.primary),
                     const SizedBox(width: 4),
                   ],
                   Text(
@@ -607,42 +599,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Row(
         children: [
-          _langOption('EN', !isEn == false, () async {
-            await userProvider.updateLocale('en');
-          }, isEn),
-          _langOption('CN', isEn == false, () async {
-            await userProvider.updateLocale('zh');
-          }, !isEn),
-        ],
-      ),
-    );
-  }
-
-  Widget _langOption(
-      String label, bool _, VoidCallback onTap, bool isSelected) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            gradient: isSelected ? AppTheme.primaryGradient : null,
-            color: isSelected ? null : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppTheme.textSecondary,
-                fontFamily: 'Inter',
+          Expanded(
+            child: GestureDetector(
+              onTap: () async {
+                await userProvider.updateLocale('en');
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: isEn ? AppTheme.primaryGradient : null,
+                  color: isEn ? null : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                ),
+                child: Center(
+                  child: Text(
+                    'EN',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isEn ? Colors.white : AppTheme.textSecondary,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () async {
+                await userProvider.updateLocale('zh');
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: !isEn ? AppTheme.primaryGradient : null,
+                  color: !isEn ? null : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                ),
+                child: Center(
+                  child: Text(
+                    'CN',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: !isEn ? Colors.white : AppTheme.textSecondary,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -658,7 +669,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           if (_authService.isLoggedIn) ...[
-            _accountRow(
+            SettingsRow(
               icon: Icons.favorite_outline,
               iconColor: AppTheme.primary,
               label: 'My Favorites',
@@ -668,15 +679,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 1,
                 color: AppTheme.outline.withOpacity(0.4),
                 indent: 52),
-            _accountRow(
+            SettingsRow(
               icon: Icons.logout,
               iconColor: AppTheme.error,
+              trailing: const SizedBox.shrink(),
               label: 'Logout',
-              labelColor: AppTheme.error,
               onTap: () => _handleLogout(context),
             ),
           ] else ...[
-            _accountRow(
+            SettingsRow(
               icon: Icons.login,
               iconColor: AppTheme.primary,
               label: 'Login / Register',
@@ -687,41 +698,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _accountRow({
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    Color? labelColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 20),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: labelColor ?? AppTheme.textPrimary,
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ),
-            if (labelColor == null)
-              const Icon(Icons.arrow_forward_ios,
-                  color: AppTheme.textHint, size: 14),
-          ],
-        ),
       ),
     );
   }
@@ -795,32 +771,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Helpers ──────────────────────────────────────────────
-  Widget _sectionLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textHint,
-        letterSpacing: 1.2,
-        fontFamily: 'Inter',
-      ),
-    );
-  }
-
-  Widget _prefLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textSecondary,
-        letterSpacing: 1.2,
-        fontFamily: 'Inter',
-      ),
-    );
-  }
-
   String _getAllergenTranslation(AppLocalizations S, String allergen) {
     switch (allergen) {
       case '花生': return S.peanut;
