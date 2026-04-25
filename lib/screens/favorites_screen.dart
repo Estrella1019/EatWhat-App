@@ -45,13 +45,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> _deleteFavorite(int favoriteId) async {
+    final S = AppLocalizations.of(context)!;
+
     try {
       await _authService.deleteFavorite(favoriteId);
       await _loadFavorites();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Removed from favorites'),
+            content: Text(_favoritesRemovedText(S)),
             backgroundColor: AppTheme.primary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -63,7 +65,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e')),
+          SnackBar(content: Text('${_deleteFailedText(S)}: $e')),
         );
       }
     }
@@ -71,6 +73,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Column(
@@ -94,9 +98,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Your Favorites',
-                  style: TextStyle(
+                Text(
+                  _favoritesPageTitle(S),
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: AppTheme.textPrimary,
@@ -105,9 +109,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'A personal collection of your most cherished culinary discoveries.',
-                  style: TextStyle(
+                Text(
+                  _favoritesSubtitle(S),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textSecondary,
                     fontFamily: 'Inter',
@@ -143,6 +147,76 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ],
       ),
     );
+  }
+
+  String _favoritesSubtitle(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '收藏你最喜欢的菜谱，方便随时回来看。';
+    }
+    return 'A personal collection of your most cherished culinary discoveries.';
+  }
+
+  String _favoritesRemovedText(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '已取消收藏';
+    }
+    return 'Removed from favorites';
+  }
+
+  String _deleteFailedText(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '删除失败';
+    }
+    return 'Failed to delete';
+  }
+
+  String _favoritesPageTitle(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '我的收藏';
+    }
+    return 'Your Favorites';
+  }
+
+  String _removeFavoriteTitle(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '移除收藏';
+    }
+    return 'Remove Favorite';
+  }
+
+  String _removeFavoriteMessage(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '确定要把这道菜从收藏中移除吗？';
+    }
+    return 'Are you sure you want to remove this recipe from favorites?';
+  }
+
+  String _removeText(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '移除';
+    }
+    return 'Remove';
+  }
+
+  String _emptyFavoritesTitle(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '还没有收藏';
+    }
+    return 'No favorites yet';
+  }
+
+  String _emptyFavoritesSubtitle(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '去收藏你喜欢的菜谱吧';
+    }
+    return 'Start saving recipes you love';
+  }
+
+  String _retryText(AppLocalizations S) {
+    if (S.localeName.startsWith('zh')) {
+      return '重试';
+    }
+    return 'Retry';
   }
 
   Widget _buildNavBar(BuildContext context) {
@@ -295,33 +369,34 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   void _showDeleteDialog(Favorite favorite) {
+    final S = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
-        title: const Text(
-          'Remove Favorite',
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
+        title: Text(
+          _removeFavoriteTitle(S),
+          style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
         ),
-        content: const Text(
-          'Are you sure you want to remove this recipe from favorites?',
-          style: TextStyle(fontFamily: 'Inter'),
+        content: Text(
+          _removeFavoriteMessage(S),
+          style: const TextStyle(fontFamily: 'Inter'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            child: Text(S.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _deleteFavorite(favorite.id);
             },
-            child: const Text(
-              'Remove',
-              style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
+            child: Text(
+              _removeText(S),
+              style: const TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -330,15 +405,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget _buildEmptyState() {
+    final S = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.favorite_border, size: 80, color: AppTheme.outline.withOpacity(0.3)),
           const SizedBox(height: 24),
-          const Text(
-            'No favorites yet',
-            style: TextStyle(
+          Text(
+            _emptyFavoritesTitle(S),
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppTheme.textPrimary,
@@ -347,8 +423,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Start saving recipes you love',
-            style: TextStyle(
+            _emptyFavoritesSubtitle(S),
+            style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
               fontFamily: 'Inter',
@@ -360,6 +436,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget _buildErrorState() {
+    final S = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -369,7 +446,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Text(_errorMessage!, style: const TextStyle(color: AppTheme.error)),
           const SizedBox(height: 16),
           GradientButton(
-            label: 'Retry',
+            label: _retryText(S),
             onPressed: _loadFavorites,
             width: 120,
           ),
