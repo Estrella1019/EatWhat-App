@@ -62,12 +62,17 @@ Users upload photos of their ingredients. The app calls the backend YOLO-World m
 - 🏥 过敏原管理 / Allergen management
 - 👤 多用户档案 / Multiple user profiles
 
-### 4. 虚拟冰箱 / Virtual Pantry
+### 4. 历史记录 / History
+- 📜 浏览历史食谱 / Browse historical recipes
+- 🗑️ 清空历史记录 / Clear history
+- 🔍 记录每次美食探索 / Track culinary discoveries
+
+### 5. 虚拟冰箱 / Virtual Pantry
 - 📦 食材库存管理 / Ingredient inventory management
 - ⏰ 过期提醒 / Expiration reminders
 - 📊 分类展示 / Categorized display
 
-### 5. 国际化支持 / Internationalization
+### 6. 国际化支持 / Internationalization
 - 🌍 简体中文 / Simplified Chinese
 - 🌎 English
 - 🔄 动态语言切换 / Dynamic language switching
@@ -109,7 +114,8 @@ lib/
 │   ├── ingredient.dart        # 食材模型 / Ingredient model
 │   ├── auth.dart              # 认证模型 / Auth models
 │   ├── favorite.dart          # 收藏模型 / Favorite models
-│   └── pantry.dart            # 冰箱模型 / Pantry model
+│   ├── pantry.dart            # 冰箱模型 / Pantry model
+│   └── history.dart           # 历史记录模型 / History model
 ├── providers/
 │   ├── user_provider.dart     # 用户状态管理 / User state
 │   ├── global_provider.dart   # 全局状态管理 / Global state
@@ -126,6 +132,7 @@ lib/
 │   ├── register_screen.dart   # 注册 / Register
 │   ├── profile_screen.dart    # 个人资料 / Profile
 │   ├── pantry_screen.dart     # 虚拟冰箱 / Pantry
+│   ├── history_screen.dart    # 历史记录 / History
 │   ├── result_screen.dart     # 结果页 / Results
 │   ├── recipe_detail_screen.dart  # 菜谱详情 / Recipe detail
 │   └── favorites_screen.dart  # 收藏列表 / Favorites
@@ -344,9 +351,11 @@ await AuthService.getInstance().deleteAllergen(allergenId);
 - [x] 菜谱生成功能 / Recipe generation
 - [x] 用户认证系统 / User authentication
 - [x] 收藏功能 / Favorites
+- [x] 历史记录功能 / History
 - [x] 过敏原管理 / Allergen management
 - [x] 虚拟冰箱 / Virtual pantry
 - [x] 多用户档案 / Multiple profiles
+- [x] 重量估算 / Weight estimation
 - [x] 前后端完整对接 / Full backend integration
 
 ---
