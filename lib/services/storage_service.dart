@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../models/history.dart';
 
 /// 本地存储服务
 class StorageService {
@@ -8,8 +9,16 @@ class StorageService {
 
   StorageService._();
 
-  /// 获取单例
-  static Future<StorageService> getInstance() async {
+  /// 获取单例（必须在 main() 已完成 await init() 后调用）
+  static StorageService getInstance() {
+    if (_instance == null) {
+      throw StateError('StorageService 未初始化，请先调用 await init()');
+    }
+    return _instance!;
+  }
+
+  /// 异步初始化（main() 中调用一次）
+  static Future<StorageService> init() async {
     if (_instance == null) {
       _instance = StorageService._();
       _prefs = await SharedPreferences.getInstance();
@@ -24,6 +33,8 @@ class StorageService {
   static const String _keyUserName = 'user_name';
   static const String _keyProfiles = 'user_profiles';
   static const String _keyLocale = 'user_locale';
+  static const String _keyHistory = 'history_records';
+  static const int _maxHistoryItems = 50;
 
   /// 保存用户档案列表
   Future<bool> saveProfiles(List<Map<String, dynamic>> profiles) async {
@@ -99,6 +110,46 @@ class StorageService {
     return _prefs!.getString(_keyLocale);
   }
 
+  /// 保存历史记录
+  Future<bool> saveHistoryRecord(HistoryRecord record) async {
+    final records = getHistoryRecords();
+    records.insert(0, record);
+    // 最多保留50条
+    final trimmed = records.take(_maxHistoryItems).toList();
+    final jsonList = trimmed.map((r) => r.toJson()).toList();
+    return await _prefs!.setString(_keyHistory, jsonEncode(jsonList));
+  }
+
+  /// 获取历史记录列表
+  List<HistoryRecord> getHistoryRecords() {
+    final jsonString = _prefs!.getString(_keyHistory);
+    if (jsonString == null || jsonString.isEmpty) {
+      return [];
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonString);
+      return decoded
+          .map((e) => HistoryRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('解析历史记录失败: $e');
+      return [];
+    }
+  }
+
+  /// 清空历史记录
+  Future<bool> clearHistoryRecords() async {
+    return await _prefs!.remove(_keyHistory);
+  }
+
+  /// 删除单条历史记录
+  Future<bool> deleteHistoryRecord(String recordId) async {
+    final records = getHistoryRecords();
+    records.removeWhere((r) => r.id == recordId);
+    final jsonList = records.map((r) => r.toJson()).toList();
+    return await _prefs!.setString(_keyHistory, jsonEncode(jsonList));
+  }
+
   /// 清除所有数据
   Future<bool> clearAll() async {
     return await _prefs!.clear();
@@ -112,6 +163,7 @@ class StorageService {
     print('口味偏好: ${getPreferences()}');
     print('就餐人数: ${getServings()}');
     print('语言设置: ${getLocale()}');
+    print('历史记录数: ${getHistoryRecords().length}');
     print('==================');
   }
 }

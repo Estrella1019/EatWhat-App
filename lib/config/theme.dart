@@ -1,74 +1,76 @@
 import 'package:flutter/material.dart';
 
-/// 应用主题配置 — 暖橙食欲调 (Harvest Warm)
+/// 应用主题配置 — 暖色精致美食风 (Warm Gourmet)
 class AppTheme {
-  // ── 主色调（暖橙金）──────────────────────────────
-  /// 深琥珀橙 — 用于按钮、标题、AppBar文字
-  static const Color primary = Color(0xFF845400);
-  /// 亮橙金 — 用于按钮渐变高亮端、chip选中
-  static const Color primaryContainer = Color(0xFFE3A043);
-  /// 浅橙桃 — 用于chip背景、tag背景
-  static const Color chipBackground = Color(0xFFFFE0B2);
-  /// 深橙 — 用于chip文字
-  static const Color chipText = Color(0xFF6D3800);
+  // ── 主色调（暖琥珀金）─────────────────────────
+  /// 暖琥珀金 — 用于按钮、标题、AppBar文字
+  static const Color primary = Color(0xFFC8833D);
+  /// 深暖金 — 用于按钮渐变、强调
+  static const Color primaryDark = Color(0xFFA66B2A);
+  /// 浅琥珀金 — 用于选中态、渐变高亮
+  static const Color primaryContainer = Color(0xFFF0C890);
+  /// 暖桃金 — chip背景
+  static const Color chipBackground = Color(0xFFFFF0E3);
+  /// 深琥珀棕 — chip文字
+  static const Color chipText = Color(0xFF7A4020);
 
   // ── 背景 & 表面 ────────────────────────────────
-  /// 奶油暖白 — scaffold背景
-  static const Color background = Color(0xFFFBF9F5);
-  /// 浅暖米 — section背景
-  static const Color surfaceLow = Color(0xFFF5F3EF);
-  /// 中暖米 — 卡片容器
-  static const Color surfaceContainer = Color(0xFFEFEEEA);
+  /// 暖米白 — scaffold背景（高级餐厅感）
+  static const Color background = Color(0xFFFFFAF6);
+  /// 暖米 — section背景
+  static const Color surfaceLow = Color(0xFFFFF5EE);
+  /// 暖灰米 — 卡片容器
+  static const Color surfaceContainer = Color(0xFFFAF5F0);
   /// 纯白 — 卡片/输入框
   static const Color cardColor = Color(0xFFFFFFFF);
 
   // ── 文字 ──────────────────────────────────────
-  /// 深暖棕 — 主文字
-  static const Color textPrimary = Color(0xFF1B1C1A);
-  /// 中棕 — 次级文字
-  static const Color textSecondary = Color(0xFF514537);
-  /// 浅棕 — placeholder / hint
-  static const Color textHint = Color(0xFF837565);
+  /// 暖黑 — 主文字
+  static const Color textPrimary = Color(0xFF2C1810);
+  /// 暖灰棕 — 次级文字
+  static const Color textSecondary = Color(0xFF6B5040);
+  /// 暖浅棕 — placeholder / hint
+  static const Color textHint = Color(0xFFA08878);
   static const Color textWhite = Colors.white;
 
   // ── 功能色 ────────────────────────────────────
-  static const Color error = Color(0xFFBA1A1A);
-  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color error = Color(0xFFD94F35);
+  static const Color errorContainer = Color(0xFFFFEBE6);
   /// 分割线 / 边框
-  static const Color outline = Color(0xFFD6C4B1);
+  static const Color outline = Color(0xFFE8D5C4);
 
-  // ── 辅助色（来自Figma设计系统）────────────────
-  /// 绿色 — secondary
-  static const Color secondary = Color(0xFF4A6640);
+  // ── 辅助色 ────────────────────────────────────
+  /// 柔绿 — secondary
+  static const Color secondary = Color(0xFF5A8A5A);
   /// 浅绿 — secondary container
-  static const Color secondaryContainer = Color(0xFFC8E9B9);
+  static const Color secondaryContainer = Color(0xFFD4EDDA);
   /// 浅绿底色
-  static const Color secondaryLight = Color(0xFFCBECBC);
-  /// 浅橙桃 — primary fixed
-  static const Color primaryFixed = Color(0xFFFFDDB6);
-  /// 浅橙桃暗色
-  static const Color primaryFixedDim = Color(0xFFFFB95B);
-  /// 三底色
-  static const Color tertiary = Color(0xFF665E4C);
-  /// 三底色容器
-  static const Color tertiaryContainer = Color(0xFFB6AC98);
+  static const Color secondaryLight = Color(0xFFE8F5E8);
+  /// 浅暖金桃 — primary fixed
+  static const Color primaryFixed = Color(0xFFFFE0C2);
+  /// 浅暖金桃暗色
+  static const Color primaryFixedDim = Color(0xFFFFC88A);
+  /// 灰棕 — 三底色
+  static const Color tertiary = Color(0xFF8B6F5A);
+  /// 灰棕容器 — 三底色容器
+  static const Color tertiaryContainer = Color(0xFFE8D9CF);
 
-  // ── 表面色（来自Figma设计系统）────────────────
+  // ── 表面色 ────────────────────────────────────
   /// 最暗表面
-  static const Color surfaceDim = Color(0xFFDBDAD6);
+  static const Color surfaceDim = Color(0xFFEDE5DD);
   /// 最高容器
-  static const Color surfaceHighest = Color(0xFFE4E2DE);
+  static const Color surfaceHighest = Color(0xFFF5EFE8);
   /// 低容器
   static const Color surfaceLowest = Color(0xFFFFFFFF);
 
   // ── 文字功能色 ───────────────────────────────
-  /// 次级文字
-  static const Color textGreen = Color(0xFF4E6A44);
+  /// 成功绿
+  static const Color textGreen = Color(0xFF5A8A5A);
 
   // ── AR 扫描专用 ───────────────────────────────
-  static const Color scanOverlay = Color(0x80000000);
-  static const Color detectionBox = Color(0xFFE3A043);
-  static const Color detectionLabel = Color(0xFF845400);
+  static const Color scanOverlay = Color(0x60000000);
+  static const Color detectionBox = Color(0xFFC8833D);
+  static const Color detectionLabel = Color(0xFFA66B2A);
 
   // ── 圆角 ──────────────────────────────────────
   static const double radiusSm = 8.0;
@@ -100,14 +102,14 @@ class AppTheme {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, primaryContainer],
+    colors: [primaryDark, primary],
   );
 
   // ── 登录页背景渐变 ────────────────────────────
   static const LinearGradient loginGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFFFE0B2), Color(0xFFFBF9F5)],
+    colors: [Color(0xFFFFF0E3), Color(0xFFFFFAF6)],
   );
 
   /// 获取全局 ThemeData

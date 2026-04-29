@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/recipe.dart';
 import '../config/theme.dart';
 import '../services/auth_service.dart';
+import '../l10n/app_localizations.dart';
 
 /// 食谱详情页面 - 参考Hungry App的RecipeDetailPage设计
 class RecipeDetailScreen extends StatefulWidget {
@@ -64,9 +65,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
 
   /// 处理收藏功能
   Future<void> _handleFavorite() async {
+    final S = AppLocalizations.of(context)!;
     if (!_authService.isLoggedIn) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先登录')),
+        SnackBar(content: Text(S.pleaseLoginFirst)),
       );
       return;
     }
@@ -83,13 +85,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('收藏成功')),
+          SnackBar(content: Text(S.favoriteAdded)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('收藏失败: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(content: Text(S.favoriteAddFailed(e.toString().replaceAll('Exception: ', '')))),
         );
       }
     } finally {

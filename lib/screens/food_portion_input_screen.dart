@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/food_portion_data.dart';
 import '../models/pantry.dart';
+import '../l10n/app_localizations.dart';
 
 /// 食物份量输入页面
 /// 在YOLO识别后，让用户选择或输入食物的重量/数量
@@ -49,14 +50,21 @@ class _FoodPortionInputScreenState extends State<FoodPortionInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context);
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('确认食材份量'),
+        title: Text(S.confirmPortion),
         actions: [
           if (widget.onSkip != null)
             TextButton(
               onPressed: widget.onSkip,
-              child: const Text('跳过'),
+              child: Text(S.skip),
             ),
         ],
       ),

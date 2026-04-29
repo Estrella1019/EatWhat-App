@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/global_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/recipe_card.dart';
 import 'recipe_detail_screen.dart';
 
@@ -11,10 +12,17 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final globalProvider = Provider.of<GlobalProvider>(context);
+    final S = AppLocalizations.of(context);
+
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('推荐菜谱'),
+        title: Text(S.recommendedRecipes),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -25,13 +33,13 @@ class ResultScreen extends StatelessWidget {
         ],
       ),
       body: globalProvider.isLoading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('正在生成菜谱...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(S.generatingRecipe),
                 ],
               ),
             )
@@ -53,14 +61,14 @@ class ResultScreen extends StatelessWidget {
                           globalProvider.clearError();
                           Navigator.pop(context);
                         },
-                        child: const Text('返回'),
+                        child: Text(S.goBack),
                       ),
                     ],
                   ),
                 )
               : globalProvider.recipes.isEmpty
-                  ? const Center(
-                      child: Text('暂无菜谱'),
+                  ? Center(
+                      child: Text(S.noRecipes),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16.0),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import 'home_screen.dart';
 import 'pantry_screen.dart';
 import 'favorites_screen.dart';
+import 'history_screen.dart';
 import 'profile_screen.dart';
 
-/// 主框架 - 底部导航栏 (Figma Harvest Warm 设计)
+/// 主框架 - 底部五导航栏（参考图设计）
 class MainScaffold extends StatefulWidget {
   final int initialIndex;
 
@@ -28,113 +30,394 @@ class _MainScaffoldState extends State<MainScaffold> {
     HomeScreen(),
     PantryScreen(),
     FavoritesScreen(),
+    HistoryScreen(),
     ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context);
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      // ── Figma风格底部导航栏 ──
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppTheme.background.withOpacity(0.95),
-          border: Border(
-            top: BorderSide(
-              color: AppTheme.outline.withOpacity(0.15),
-              width: 0.5,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
             ),
-          ),
+          ],
         ),
         child: SafeArea(
           top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Tab Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(
-                      icon: Icons.photo_camera_outlined,
-                      activeIcon: Icons.photo_camera,
-                      label: 'Scan',
-                      index: 0,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.inventory_2_outlined,
-                      activeIcon: Icons.inventory_2,
-                      label: 'Pantry',
-                      index: 1,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.favorite_outline,
-                      activeIcon: Icons.favorite,
-                      label: 'Favorites',
-                      index: 2,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.person_outline,
-                      activeIcon: Icons.person,
-                      label: 'Profile',
-                      index: 3,
-                    ),
-                  ],
+          child: Container(
+            height: 72,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: _buildScanIcon(),
+                  activeIcon: _buildScanActiveIcon(),
+                  label: S.scanIngredient,
+                  isSelected: _currentIndex == 0,
+                  onTap: () => setState(() => _currentIndex = 0),
                 ),
-              ),
-            ],
+                _NavItem(
+                  icon: _buildFridgeIcon(),
+                  activeIcon: _buildFridgeActiveIcon(),
+                  label: S.myFridge,
+                  isSelected: _currentIndex == 1,
+                  onTap: () => setState(() => _currentIndex = 1),
+                ),
+                _NavItem(
+                  icon: _buildHeartIcon(),
+                  activeIcon: _buildHeartActiveIcon(),
+                  label: S.favorites,
+                  isSelected: _currentIndex == 2,
+                  onTap: () => setState(() => _currentIndex = 2),
+                ),
+                _NavItem(
+                  icon: _buildHistoryIcon(),
+                  activeIcon: _buildHistoryActiveIcon(),
+                  label: S.history,
+                  isSelected: _currentIndex == 3,
+                  onTap: () => setState(() => _currentIndex = 3),
+                ),
+                _NavItem(
+                  icon: _buildUserIcon(),
+                  activeIcon: _buildUserActiveIcon(),
+                  label: S.myProfile,
+                  isSelected: _currentIndex == 4,
+                  onTap: () => setState(() => _currentIndex = 4),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    required int index,
-  }) {
-    final isSelected = _currentIndex == index;
+  // 扫描图标 - 未选中
+  Widget _buildScanIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.qr_code_scanner_outlined,
+        color: AppTheme.textHint,
+        size: 20,
+      ),
+    );
+  }
 
+  // 扫描图标 - 选中
+  Widget _buildScanActiveIcon() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primary,
+                AppTheme.primaryDark,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primary.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.qr_code_scanner,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        Positioned(
+          top: 7,
+          child: Container(
+            width: 20,
+          height: 2,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 冰箱图标 - 未选中
+  Widget _buildFridgeIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.kitchen_outlined,
+        color: AppTheme.textHint,
+        size: 20,
+      ),
+    );
+  }
+
+  // 冰箱图标 - 选中
+  Widget _buildFridgeActiveIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primary,
+            AppTheme.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.kitchen,
+        color: Colors.white,
+        size: 20,
+      ),
+    );
+  }
+
+  // 心形图标 - 未选中
+  Widget _buildHeartIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.favorite_outline,
+        color: AppTheme.textHint,
+        size: 20,
+      ),
+    );
+  }
+
+  // 心形图标 - 选中
+  Widget _buildHeartActiveIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFE84C4C),
+            const Color(0xFFC83838),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE84C4C).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.favorite,
+        color: Colors.white,
+        size: 20,
+      ),
+    );
+  }
+
+  // 历史图标 - 未选中
+  Widget _buildHistoryIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.history_outlined,
+        color: AppTheme.textHint,
+        size: 20,
+      ),
+    );
+  }
+
+  // 历史图标 - 选中
+  Widget _buildHistoryActiveIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primary,
+            AppTheme.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.history,
+        color: Colors.white,
+        size: 20,
+      ),
+    );
+  }
+
+  // 用户图标 - 未选中
+  Widget _buildUserIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.person_outline,
+        color: AppTheme.textHint,
+        size: 20,
+      ),
+    );
+  }
+
+  // 用户图标 - 选中
+  Widget _buildUserActiveIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primary,
+            AppTheme.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 20,
+      ),
+    );
+  }
+}
+
+/// 导航栏子项
+class _NavItem extends StatelessWidget {
+  final Widget icon;
+  final Widget activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primaryFixed.withOpacity(0.15)
+              ? AppTheme.chipBackground
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              color: isSelected ? AppTheme.primary : AppTheme.textHint,
-              size: 24,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: isSelected ? activeIcon : icon,
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
+            const SizedBox(height: 3),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 8,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? AppTheme.primary : AppTheme.textHint,
                 fontFamily: 'Inter',
-                letterSpacing: 0.5,
+                letterSpacing: 0.2,
               ),
+              child: Text(label),
             ),
           ],
         ),

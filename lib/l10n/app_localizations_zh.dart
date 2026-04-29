@@ -72,7 +72,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enterAllergenName => '请输入过敏源名称';
 
   @override
-  String allergenAdded(String name) {
+  String allergenAdded(Object name) {
     return '已添加过敏源: $name';
   }
 
@@ -98,7 +98,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get simplifiedChinese => '简体中文';
 
   @override
-  String get traditionalChinese => '繁体中文';
+  String get traditionalChinese => '繁體中文';
 
   @override
   String get english => 'English';
@@ -155,7 +155,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pantryTitle => '我的冰箱';
 
   @override
-  String ingredientCount(int count) {
+  String ingredientCount(Object count) {
     return '$count 种食材';
   }
 
@@ -217,7 +217,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewAll => '查看全部';
 
   @override
-  String moreItems(int count) {
+  String moreItems(Object count) {
     return '还有 $count 种...';
   }
 
@@ -228,236 +228,338 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generatingRecipe => '正在生成食谱...';
 
   @override
-  String generationFailed(String error) {
+  String get historyTitle => '历史记录';
+
+  @override
+  String get historySubtitle => '记录你的每一次美食探索，方便随时回顾。';
+
+  @override
+  String get emptyHistoryTitle => '还没有记录';
+
+  @override
+  String get emptyHistorySubtitle => '开始扫描食材或生成食谱吧';
+
+  @override
+  String get historyDeleted => '已删除';
+
+  @override
+  String get clearHistoryTitle => '清空历史';
+
+  @override
+  String get clearHistoryMessage => '确定要清空所有历史记录吗？此操作不可撤销。';
+
+  @override
+  String get clearHistoryConfirm => '清空';
+
+  @override
+  String get favorites => '收藏';
+
+  @override
+  String get history => '历史';
+
+  @override
+  String get myProfile => '我的';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get currentInventory => '当前库存';
+
+  @override
+  String categories(Object count) {
+    return '$count 个分类';
+  }
+
+  @override
+  String get useARToAdd => '使用AR扫描添加食材';
+
+  @override
+  String kcal(Object count) {
+    return '$count 千卡';
+  }
+
+  @override
+  String minutes(Object count) {
+    return '$count 分钟';
+  }
+
+  @override
+  String get pantryEmptyHint => '冰箱空空如也';
+
+  @override
+  String items(Object count) {
+    return '$count 种食材';
+  }
+
+  @override
+  String get confirmLogout => '确认登出';
+
+  @override
+  String get logoutConfirmMessage => '确定要退出登录吗？';
+
+  @override
+  String get logoutButton => '登出';
+
+  @override
+  String get enterAllergenHint => '例如：芝麻';
+
+  @override
+  String get profileUpdated => '个人档案已更新';
+
+  @override
+  String get updateProfile => '更新档案';
+
+  @override
+  String get editProfile => '编辑档案';
+
+  @override
+  String get addProfile => '添加档案';
+
+  @override
+  String get profileManagement => '档案管理';
+
+  @override
+  String get preferences => '偏好设置';
+
+  @override
+  String get enterYourUsername => '请输入用户名';
+
+  @override
+  String get allergyFilters => '过敏原筛选';
+
+  @override
+  String get servings => '就餐人数';
+
+  @override
+  String get language => '语言设置';
+
+  @override
+  String get savedRecipes => '收藏食谱';
+
+  @override
+  String get cookedThisWeek => '本周烹饪';
+
+  @override
+  String get premiumMember => '高级会员';
+
+  @override
+  String get yourName => '你的名字';
+
+  @override
+  String get myFavorites => '我的收藏';
+
+  @override
+  String get loginRegister => '登录 / 注册';
+
+  @override
+  String get logout => '登出';
+
+  @override
+  String get account => '账户';
+
+  @override
+  String get userSettings => '用户设置';
+
+  @override
+  String get recommendedRecipes => '推荐菜谱';
+
+  @override
+  String get noRecipes => '暂无菜谱';
+
+  @override
+  String get goBack => '返回';
+
+  @override
+  String get favoritesPageTitle => '我的收藏';
+
+  @override
+  String get favoritesSubtitle => '收藏你最喜欢的菜谱，方便随时回来看。';
+
+  @override
+  String get favoritesRemoved => '已取消收藏';
+
+  @override
+  String get removeFavoriteTitle => '移除收藏';
+
+  @override
+  String get removeFavoriteMessage => '确定要把这道菜从收藏中移除吗？';
+
+  @override
+  String get remove => '移除';
+
+  @override
+  String get emptyFavoritesTitle => '还没有收藏';
+
+  @override
+  String get emptyFavoritesSubtitle => '去收藏你喜欢的菜谱吧';
+
+  @override
+  String get deleteFailed => '删除失败';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get pleaseLoginFirst => '请先登录';
+
+  @override
+  String get favoriteAdded => '收藏成功';
+
+  @override
+  String favoriteAddFailed(Object error) {
+    return '收藏失败: $error';
+  }
+
+  @override
+  String get weightDemo => '智能重量估算演示';
+
+  @override
+  String get skipAll => '全部跳过';
+
+  @override
+  String get skipConfirm => '跳过确认';
+
+  @override
+  String get skipAllMessage => '确定要跳过所有未添加的食材吗？';
+
+  @override
+  String get confirmPortion => '确认食材份量';
+
+  @override
+  String get addToFridge => '存入冰箱';
+
+  @override
+  String get generateRecipes => '生成菜谱';
+
+  @override
+  String ingredientsAdded(Object count) {
+    return '已添加 $count 种食材到冰箱';
+  }
+
+  @override
+  String get generatingRecipes => '正在生成食谱...';
+
+  @override
+  String get enterNickname => '请输入昵称';
+
+  @override
+  String switchedTo(Object name) {
+    return '已切换到 $name';
+  }
+
+  @override
+  String get yoloComplete => 'YOLO识别完成';
+
+  @override
+  String addedToFridge(Object name) {
+    return '$name 已添加到冰箱';
+  }
+
+  @override
+  String get viewFridge => '查看冰箱';
+
+  @override
+  String doneCount(Object count) {
+    return '完成 ($count)';
+  }
+
+  @override
+  String addedCountOf(Object count, Object total) {
+    return '已添加 $count/$total 种食材';
+  }
+
+  @override
+  String get selectImageToRecognize => '请选择图片进行识别';
+
+  @override
+  String get reselectImage => '重新选图';
+
+  @override
+  String get yoloRecognizing => 'YOLO识别中...';
+
+  @override
+  String get callingBackend => '正在调用后端识别食材';
+
+  @override
+  String detectedItems(Object count) {
+    return '已识别到 $count 种食材';
+  }
+
+  @override
+  String get skip => '跳过';
+
+  @override
+  String generationFailed(Object error) {
     return '生成失败: $error';
   }
-}
 
-/// The translations for Chinese, using the Han script (`zh_Hant`).
-class AppLocalizationsZhHant extends AppLocalizationsZh {
-  AppLocalizationsZhHant() : super('zh_Hant');
-
-  @override
-  String get appTitle => '吃啥APP';
-
-  @override
-  String get todayEatWhat => '今天吃什麼？';
-
-  @override
-  String get myFridge => '我的冰箱';
-
-  @override
-  String get profile => '個人檔案';
-
-  @override
-  String get profileTitle => '個人檔案';
-
-  @override
-  String get save => '儲存';
-
-  @override
-  String get cancel => '取消';
-
-  @override
-  String get add => '新增';
-
-  @override
-  String get delete => '刪除';
-
-  @override
-  String get edit => '編輯';
-
-  @override
-  String get confirm => '確認';
-
-  @override
-  String get manageProfiles => '管理個人檔案';
-
-  @override
-  String get addFamilyFriends => '新增家人和朋友的檔案';
-
-  @override
-  String get username => '使用者名稱';
-
-  @override
-  String get enterUsername => '請輸入使用者名稱';
-
-  @override
-  String get allergens => '過敏原';
-
-  @override
-  String get selectOrAddAllergens => '選擇或新增你的過敏食材';
-
-  @override
-  String get customAllergen => '自訂';
-
-  @override
-  String get customAllergens => '自訂過敏源：';
-
-  @override
-  String get addCustomAllergen => '新增自訂過敏源';
-
-  @override
-  String get enterAllergenName => '請輸入過敏源名稱';
-
-  @override
-  String allergenAdded(String name) {
-    return '已新增過敏源: $name';
-  }
-
-  @override
-  String get tastePreferences => '口味偏好';
-
-  @override
-  String get multipleChoice => '可多選';
-
-  @override
-  String get defaultServings => '預設用餐人數';
-
-  @override
-  String get people => '人';
-
-  @override
-  String get languageSettings => '語言設定';
-
-  @override
-  String get followSystem => '跟隨系統';
-
-  @override
-  String get simplifiedChinese => '简体中文';
-
-  @override
-  String get traditionalChinese => '繁體中文';
-
-  @override
-  String get english => 'English';
-
-  @override
-  String get languageSwitched => '語言已切換';
-
-  @override
-  String get peanut => '花生';
-
-  @override
-  String get seafood => '海鮮';
-
-  @override
-  String get milk => '牛奶';
-
-  @override
-  String get egg => '雞蛋';
-
-  @override
-  String get soybean => '大豆';
-
-  @override
-  String get wheat => '小麥';
-
-  @override
-  String get nuts => '堅果';
-
-  @override
-  String get sesame => '芝麻';
-
-  @override
-  String get mild => '清淡';
-
-  @override
-  String get heavy => '重口味';
-
-  @override
-  String get mildlySpicy => '微辣';
-
-  @override
-  String get mediumSpicy => '中辣';
-
-  @override
-  String get verySpicy => '特辣';
-
-  @override
-  String get sweet => '甜味';
-
-  @override
-  String get sour => '酸味';
-
-  @override
-  String get pantryTitle => '我的冰箱';
-
-  @override
-  String ingredientCount(int count) {
-    return '$count 種食材';
-  }
-
   @override
-  String get addIngredient => '新增食材';
+  String get profileIdentity => '档案身份';
 
   @override
-  String get scanIngredient => '掃描食材';
+  String get nickname => '昵称';
 
   @override
-  String get emptyPantry => '冰箱空空如也';
+  String get nicknamePlaceholder => '大厨';
 
   @override
-  String get addIngredientsToStart => '新增食材開始使用吧';
+  String get relationship => '关系';
 
   @override
-  String get generateRecipe => '生成食譜';
+  String get gender => '性别';
 
   @override
-  String get generating => '生成中...';
+  String get birthday => '生日';
 
   @override
-  String get recipeRecommendation => '食譜推薦';
+  String get selectBirthday => '选择生日';
 
   @override
-  String get searchRecipesIngredients => '搜尋食譜、食材...';
+  String get foodAllergies => '食物过敏';
 
   @override
-  String get smartARScan => '智慧AR掃描';
+  String get noAllergiesYet => '还没有添加过敏原';
 
   @override
-  String get startScan => '開始掃描';
+  String get tapToRemoveAllergy => '点击过敏原标签即可从档案中移除。';
 
   @override
-  String get realtimeRecognition => '即時識別食材，一鍵生成食譜';
+  String get saveChanges => '保存更改';
 
   @override
-  String get quickStart => '快速開始，發現美味...';
+  String get deleteProfile => '删除档案';
 
   @override
-  String get photoRecognition => '相簿識別';
+  String get deleteProfileConfirm => '确定要删除这个档案吗？';
 
   @override
-  String get recognizeFromPhoto => '從照片識別食材';
+  String get addAllergy => '添加过敏原';
 
   @override
-  String get weightEstimation => '重量估算';
+  String get enterAllergenExample => '例如：麸质、大豆...';
 
   @override
-  String get smartPortionRecognition => '智慧份量識別';
+  String get addItem => '添加';
 
   @override
-  String get todayTrending => '今日熱門';
+  String get self => '本人';
 
   @override
-  String get viewMore => '檢視更多';
+  String get spouse => '配偶';
 
   @override
-  String get viewAll => '檢視全部';
+  String get child => '子女';
 
   @override
-  String moreItems(int count) {
-    return '還有 $count 種...';
-  }
+  String get friend => '朋友';
 
   @override
-  String get cookWithThese => '用這些食材做菜';
+  String get male => '男';
 
   @override
-  String get generatingRecipe => '正在生成食譜...';
+  String get female => '女';
 
   @override
-  String generationFailed(String error) {
-    return '生成失敗: $error';
-  }
+  String get nonBinary => '其他';
 }

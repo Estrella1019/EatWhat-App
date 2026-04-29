@@ -4,6 +4,7 @@ import '../providers/user_provider.dart';
 import '../models/user.dart';
 import '../services/media_service.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 
 /// 档案编辑界面 — Figma Harvest Warm 设计稿
 class ProfileEditScreen extends StatefulWidget {
@@ -24,8 +25,47 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   String? _gender;
   List<String> _allergens = [];
 
-  final List<String> _relationshipOptions = ['Self', 'Spouse', 'Child', 'Friend'];
-  final List<String> _genderOptions = ['Male', 'Female', 'Non-binary'];
+  // Keep internal values in English (consistent with storage)
+  static const _relationshipValues = ['Self', 'Spouse', 'Child', 'Friend'];
+  static const _genderValues = ['Male', 'Female', 'Non-binary'];
+
+  String _getLocalizedRelationship(AppLocalizations S, String? value) {
+    if (value == null) return S.self;
+    final index = _relationshipValues.indexOf(value);
+    switch (index) {
+      case 0: return S.self;
+      case 1: return S.spouse;
+      case 2: return S.child;
+      case 3: return S.friend;
+      default: return S.self;
+    }
+  }
+
+  String _getLocalizedGender(AppLocalizations S, String? value) {
+    if (value == null) return S.male;
+    final index = _genderValues.indexOf(value);
+    switch (index) {
+      case 0: return S.male;
+      case 1: return S.female;
+      case 2: return S.nonBinary;
+      default: return S.male;
+    }
+  }
+
+  String _getInternalRelationship(AppLocalizations S, String displayValue) {
+    if (displayValue == S.self) return 'Self';
+    if (displayValue == S.spouse) return 'Spouse';
+    if (displayValue == S.child) return 'Child';
+    if (displayValue == S.friend) return 'Friend';
+    return 'Self';
+  }
+
+  String _getInternalGender(AppLocalizations S, String displayValue) {
+    if (displayValue == S.male) return 'Male';
+    if (displayValue == S.female) return 'Female';
+    if (displayValue == S.nonBinary) return 'Non-binary';
+    return 'Male';
+  }
 
   @override
   void initState() {
@@ -77,10 +117,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   void _save() {
+    final S = AppLocalizations.of(context)!;
     if (_nicknameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please enter a nickname'),
+          content: Text(S.enterNickname),
           backgroundColor: AppTheme.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -115,24 +156,25 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   void _delete() {
+    final S = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
-        title: const Text(
-          'Delete Profile',
-          style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
+        title: Text(
+          S.deleteProfile,
+          style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
         ),
-        content: const Text(
-          'Are you sure you want to delete this profile?',
-          style: TextStyle(fontFamily: 'Inter'),
+        content: Text(
+          S.deleteProfileConfirm,
+          style: const TextStyle(fontFamily: 'Inter'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            child: Text(S.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
@@ -141,9 +183,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
+            child: Text(
+              S.delete,
+              style: const TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -151,14 +193,33 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
+  List<String> _getRelationshipOptions(AppLocalizations S) {
+    return [
+      S.self,
+      S.spouse,
+      S.child,
+      S.friend,
+    ];
+  }
+
+  List<String> _getGenderOptions(AppLocalizations S) {
+    return [
+      S.male,
+      S.female,
+      S.nonBinary,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Column(
         children: [
           // ── 顶部导航栏 (Figma风格) ──
-          _buildNavBar(context),
+          _buildNavBar(context, S),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -218,9 +279,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'PROFILE IDENTITY',
-                        style: TextStyle(
+                      Text(
+                        S.profileIdentity,
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppTheme.secondary,
@@ -235,28 +296,32 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
                 // ── Form Fields ──
                 // Nickname
-                _buildFieldLabel('Nickname'),
+                _buildFieldLabel(S.nickname),
                 const SizedBox(height: 6),
                 _buildInputField(
                   controller: _nicknameController,
-                  hint: 'Artisan Chef',
+                  hint: S.nicknamePlaceholder,
                   isTitle: true,
                 ),
                 const SizedBox(height: 20),
 
-                // Relationship & Gender
+                // Relationship & Gender (use localized display values)
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('Relationship'),
+                          _buildFieldLabel(S.relationship),
                           const SizedBox(height: 6),
-                          _buildDropdown(
-                            value: _relationship,
-                            items: _relationshipOptions,
-                            onChanged: (v) => setState(() => _relationship = v),
+                          _buildLocalizedDropdown(
+                            displayValue: _getLocalizedRelationship(S, _relationship),
+                            allOptions: [S.self, S.spouse, S.child, S.friend],
+                            onChanged: (v) {
+                              if (v != null) {
+                                setState(() => _relationship = _getInternalRelationship(S, v));
+                              }
+                            },
                           ),
                         ],
                       ),
@@ -266,12 +331,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFieldLabel('Gender'),
+                          _buildFieldLabel(S.gender),
                           const SizedBox(height: 6),
-                          _buildDropdown(
-                            value: _gender,
-                            items: _genderOptions,
-                            onChanged: (v) => setState(() => _gender = v),
+                          _buildLocalizedDropdown(
+                            displayValue: _getLocalizedGender(S, _gender),
+                            allOptions: [S.male, S.female, S.nonBinary],
+                            onChanged: (v) {
+                              if (v != null) {
+                                setState(() => _gender = _getInternalGender(S, v));
+                              }
+                            },
                           ),
                         ],
                       ),
@@ -281,7 +350,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 const SizedBox(height: 20),
 
                 // Birthday
-                _buildFieldLabel('Birthday'),
+                _buildFieldLabel(S.birthday),
                 const SizedBox(height: 6),
                 GestureDetector(
                   onTap: _selectBirthday,
@@ -296,8 +365,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       children: [
                         Text(
                           _birthday != null
-                              ? _formatBirthday(_birthday!)
-                              : 'Select birthday',
+                              ? _formatBirthday(_birthday!, S)
+                              : S.selectBirthday,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -316,9 +385,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Food Allergies',
-                      style: TextStyle(
+                    Text(
+                      S.foodAllergies,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textPrimary,
@@ -333,14 +402,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           color: AppTheme.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.add, size: 18, color: AppTheme.primary),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
-                              'Add',
-                              style: TextStyle(
+                              S.add,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: AppTheme.primary,
@@ -356,7 +425,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 const SizedBox(height: 12),
                 if (_allergens.isEmpty)
                   Text(
-                    'No allergies added yet',
+                    S.noAllergiesYet,
                     style: TextStyle(
                       fontSize: 13,
                       color: AppTheme.textHint,
@@ -378,7 +447,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
-                      'Tapping an allergy chip will remove it from your profile.',
+                      S.tapToRemoveAllergy,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textHint,
@@ -390,7 +459,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
                 // ── Save Button ──
                 GradientButton(
-                  label: 'Save Changes',
+                  label: S.saveChanges,
                   onPressed: _save,
                 ),
                 const SizedBox(height: 32),
@@ -402,7 +471,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildNavBar(BuildContext context) {
+  Widget _buildNavBar(BuildContext context, AppLocalizations S) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.background.withOpacity(0.95),
@@ -426,7 +495,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 Text(
-                  widget.profile == null ? 'Add Profile' : 'Edit Profile',
+                  widget.profile == null ? S.addProfile : S.editProfile,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -491,9 +560,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildDropdown({
-    required String? value,
-    required List<String> items,
+  Widget _buildLocalizedDropdown({
+    required String displayValue,
+    required List<String> allOptions,
     required ValueChanged<String?> onChanged,
   }) {
     return Container(
@@ -504,7 +573,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: value,
+          value: displayValue,
           isExpanded: true,
           icon: const Icon(Icons.expand_more, color: AppTheme.textHint),
           style: const TextStyle(
@@ -513,7 +582,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             color: AppTheme.textPrimary,
             fontFamily: 'Inter',
           ),
-          items: items.map((item) {
+          items: allOptions.map((item) {
             return DropdownMenuItem(value: item, child: Text(item));
           }).toList(),
           onChanged: onChanged,
@@ -522,15 +591,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  String _formatBirthday(DateTime date) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  String _formatBirthday(DateTime date, AppLocalizations S) {
+    // 根据语言返回不同格式
+    if (S.localeName.startsWith('zh')) {
+      final months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+      return '${date.year}年${date.month}月${date.day}日';
+    } else {
+      final months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    }
   }
 
   void _addAllergen() {
+    final S = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     showModalBottomSheet(
       context: context,
@@ -557,9 +633,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Add Allergy',
-              style: TextStyle(
+            Text(
+              S.addAllergy,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Manrope',
@@ -575,8 +651,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               child: TextField(
                 controller: controller,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. Gluten, Soy...',
+                decoration: InputDecoration(
+                  hintText: S.enterAllergenExample,
                   border: InputBorder.none,
                 ),
                 style: const TextStyle(fontSize: 18),
@@ -598,7 +674,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                         ),
                       ),
-                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                      child: Text(S.cancel, style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ),
@@ -625,7 +701,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                         ),
                       ),
-                      child: const Text('Add Item', style: TextStyle(fontWeight: FontWeight.w700)),
+                      child: Text(S.addItem, style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ),

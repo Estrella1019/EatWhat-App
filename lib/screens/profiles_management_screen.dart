@@ -3,20 +3,27 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../models/user.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import 'profile_edit_screen.dart';
 
-/// 档案管理界面 — Figma Harvest Warm 设计稿
+/// 档案管理界面
 class ProfilesManagementScreen extends StatelessWidget {
   const ProfilesManagementScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context);
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Column(
         children: [
-          // ── 顶部导航栏 (Figma风格) ──
-          _buildNavBar(context),
+          _buildNavBar(context, S),
           Expanded(
             child: Consumer<UserProvider>(
               builder: (context, userProvider, child) {
@@ -28,10 +35,9 @@ class ProfilesManagementScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 16),
 
-                    // ── Section Header ──
-                    const Text(
-                      'Family Circle',
-                      style: TextStyle(
+                    Text(
+                      S.manageProfiles,
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppTheme.textPrimary,
@@ -40,9 +46,9 @@ class ProfilesManagementScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Manage dietary preferences and allergies for each member.',
-                      style: TextStyle(
+                    Text(
+                      S.addFamilyFriends,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
@@ -51,7 +57,6 @@ class ProfilesManagementScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Profile Cards ──
                     ...profiles.map((profile) {
                       final isSelected = currentProfile?.id == profile.id;
                       return Padding(
@@ -63,7 +68,7 @@ class ProfilesManagementScreen extends StatelessWidget {
                             userProvider.setCurrentProfile(profile);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Switched to ${profile.nickname ?? profile.name}'),
+                                content: Text(S.switchedTo(profile.nickname ?? profile.name)),
                                 backgroundColor: AppTheme.primary,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
@@ -84,7 +89,6 @@ class ProfilesManagementScreen extends StatelessWidget {
                       );
                     }),
 
-                    // ── Add New Profile Button ──
                     _AddProfileCard(
                       onTap: () {
                         Navigator.push(
@@ -104,7 +108,7 @@ class ProfilesManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavBar(BuildContext context) {
+  Widget _buildNavBar(BuildContext context, AppLocalizations S) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.background.withOpacity(0.95),
@@ -128,9 +132,9 @@ class ProfilesManagementScreen extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                 ),
                 const SizedBox(width: 4),
-                const Text(
-                  'Profiles Management',
-                  style: TextStyle(
+                Text(
+                  S.profileManagement,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.primary,

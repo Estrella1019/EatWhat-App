@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../models/detection_result.dart';
+import '../models/history.dart';
 import '../providers/pantry_provider.dart';
 import '../providers/global_provider.dart';
 import '../providers/user_provider.dart';
@@ -9,7 +11,7 @@ import '../services/media_service.dart';
 import 'pantry_screen.dart';
 import 'result_screen.dart';
 
-/// AR扫描页面 - 调用后端YOLO识别真实食材
+/// AR扫描页面
 class CameraScanDemoScreen extends StatefulWidget {
   const CameraScanDemoScreen({super.key});
 
@@ -31,7 +33,6 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     });
   }
 
-  /// 选择图片并调用后端YOLO识别
   Future<void> _pickAndRecognize() async {
     final mediaService = MediaService();
     final imageBytes = await mediaService.pickFromGallery();
@@ -83,23 +84,30 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final S = AppLocalizations.of(context);
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          _buildCameraPreview(),
+          _buildCameraPreview(S),
           if (_detections.isNotEmpty) _buildAROverlay(),
-          _buildTopBar(),
-          if (_isScanning) _buildScanningIndicator(),
-          if (_errorMessage != null) _buildErrorView(),
-          if (_detections.isNotEmpty && !_isScanning) _buildDetectionList(),
-          if (_detections.isNotEmpty && !_isScanning) _buildActionButtons(),
+          _buildTopBar(S),
+          if (_isScanning) _buildScanningIndicator(S),
+          if (_errorMessage != null) _buildErrorView(S),
+          if (_detections.isNotEmpty && !_isScanning) _buildDetectionList(S),
+          if (_detections.isNotEmpty && !_isScanning) _buildActionButtons(S),
         ],
       ),
     );
   }
 
-  Widget _buildCameraPreview() {
+  Widget _buildCameraPreview(AppLocalizations S) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -118,7 +126,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                       size: 100,
                       color: Colors.white.withValues(alpha: 0.3)),
                   const SizedBox(height: 20),
-                  Text('请选择图片进行识别',
+                  Text(S.selectImageToRecognize,
                       style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 18)),
@@ -135,7 +143,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AppLocalizations S) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -150,8 +158,8 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
               TextButton.icon(
                 onPressed: _pickAndRecognize,
                 icon: const Icon(Icons.refresh, color: Colors.white),
-                label: const Text('重新选图',
-                    style: TextStyle(color: Colors.white)),
+                label: Text(S.reselectImage,
+                    style: const TextStyle(color: Colors.white)),
               ),
           ],
         ),
@@ -159,7 +167,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  Widget _buildScanningIndicator() {
+  Widget _buildScanningIndicator(AppLocalizations S) {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -167,24 +175,24 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
           color: Colors.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
-            SizedBox(height: 16),
-            Text('YOLO识别中...',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
-            SizedBox(height: 4),
-            Text('正在调用后端识别食材',
-                style: TextStyle(color: Colors.white70, fontSize: 12)),
+            const SizedBox(height: 16),
+            Text(S.yoloRecognizing,
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(S.callingBackend,
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildErrorView() {
+  Widget _buildErrorView(AppLocalizations S) {
     return Center(
       child: Container(
         margin: const EdgeInsets.all(32),
@@ -203,14 +211,14 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
                 textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
-                onPressed: _pickAndRecognize, child: const Text('重试')),
+                onPressed: _pickAndRecognize, child: Text(S.retry)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetectionList() {
+  Widget _buildDetectionList(AppLocalizations S) {
     return Positioned(
       left: 0,
       right: 0,
@@ -230,7 +238,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '已识别到 ${_detections.length} 种食材',
+                S.detectedItems(_detections.length),
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -262,7 +270,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(AppLocalizations S) {
     return Positioned(
       left: 20,
       right: 20,
@@ -272,9 +280,9 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: _saveToFridge,
+                onPressed: () => _saveToFridge(S),
                 icon: const Icon(Icons.kitchen, size: 20),
-                label: const Text('存入冰箱'),
+                label: Text(S.addToFridge),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppTheme.primary,
@@ -287,9 +295,9 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: _generateRecipes,
+                onPressed: () => _generateRecipes(S),
                 icon: const Icon(Icons.restaurant_menu, size: 20),
-                label: const Text('生成菜谱'),
+                label: Text(S.generateRecipes),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryContainer,
                   foregroundColor: Colors.white,
@@ -305,12 +313,12 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     );
   }
 
-  Future<void> _saveToFridge() async {
+  Future<void> _saveToFridge(AppLocalizations S) async {
     final pantryProvider = Provider.of<PantryProvider>(context, listen: false);
     await pantryProvider.addFromDetections(_detections);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('已添加 ${_detections.length} 种食材到冰箱'),
+        content: Text(S.ingredientsAdded(_detections.length)),
         backgroundColor: Colors.green,
       ));
       Navigator.pushReplacement(context,
@@ -318,21 +326,21 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
     }
   }
 
-  Future<void> _generateRecipes() async {
+  Future<void> _generateRecipes(AppLocalizations S) async {
     final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
+      builder: (_) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('生成菜谱中...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(S.generatingRecipes),
             ]),
           ),
         ),
@@ -346,6 +354,7 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
         allergens: userProvider.user.allergens,
         servings: userProvider.user.defaultServings,
         preferences: userProvider.user.preferences,
+        source: HistorySource.arScan,
       );
       if (mounted) {
         Navigator.pop(context);
@@ -356,13 +365,12 @@ class _CameraScanDemoScreenState extends State<CameraScanDemoScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('生成失败: $e')));
+            .showSnackBar(SnackBar(content: Text(S.generationFailed(e.toString()))));
       }
     }
   }
 }
 
-/// AR叠加层绘制器
 class AROverlayPainter extends CustomPainter {
   final List<DetectionResult> detections;
   AROverlayPainter(this.detections);

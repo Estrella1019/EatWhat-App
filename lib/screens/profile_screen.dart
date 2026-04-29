@@ -50,9 +50,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await Future.delayed(const Duration(milliseconds: 600));
     setState(() => _isSaving = false);
     if (mounted) {
+      final S = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Profile updated'),
+          content: Text(S?.profileUpdated ?? 'Profile updated'),
           backgroundColor: AppTheme.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -84,27 +85,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
 
                 // ── Avatar Card ──
-                _buildAvatarCard(userProvider),
+                _buildAvatarCard(userProvider, S),
                 const SizedBox(height: 16),
 
                 // ── Stats Row ──
-                _buildStatsRow(),
+                _buildStatsRow(S),
                 const SizedBox(height: 24),
 
                 // ── User Settings Section ──
-                const SectionLabel('USER SETTINGS'),
+                SectionLabel(S.userSettings),
                 const SizedBox(height: 8),
-                _buildSettingsCard(context),
+                _buildSettingsCard(context, S),
                 const SizedBox(height: 24),
 
                 // ── Preferences Section ──
                 Row(
-                  children: const [
+                  children: [
                     Icon(Icons.tune, color: AppTheme.primary, size: 18),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      'Preferences',
-                      style: TextStyle(
+                      S.preferences,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textPrimary,
@@ -125,36 +126,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Username
-                      const PrefLabel('USERNAME'),
+                      PrefLabel(S.username),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter your username',
+                        decoration: InputDecoration(
+                          hintText: S.enterYourUsername,
                         ),
                       ),
                       const SizedBox(height: 20),
 
                       // Allergy Filters
-                      const PrefLabel('ALLERGY FILTERS'),
+                      PrefLabel(S.allergyFilters),
                       const SizedBox(height: 10),
                       _buildAllergenChips(userProvider, S),
                       const SizedBox(height: 20),
 
                       // Taste Preferences
-                      const PrefLabel('TASTE PREFERENCES'),
+                      PrefLabel(S.tastePreferences),
                       const SizedBox(height: 10),
                       _buildTasteChips(userProvider, S),
                       const SizedBox(height: 20),
 
                       // Servings
-                      const PrefLabel('SERVINGS'),
+                      PrefLabel(S.servings),
                       const SizedBox(height: 10),
                       _buildServingsRow(userProvider),
                       const SizedBox(height: 20),
 
                       // Language
-                      const PrefLabel('LANGUAGE'),
+                      PrefLabel(S.languageSettings),
                       const SizedBox(height: 10),
                       _buildLanguageToggle(userProvider),
                     ],
@@ -163,14 +164,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // ── Account Section ──
-                const SectionLabel('ACCOUNT'),
+                SectionLabel(S.account),
                 const SizedBox(height: 8),
                 _buildAccountCard(context, S),
                 const SizedBox(height: 24),
 
                 // ── Update Profile Button ──
                 GradientButton(
-                  label: 'Update Profile',
+                  label: S.updateProfile,
                   onPressed: () => _handleSave(userProvider),
                   isLoading: _isSaving,
                 ),
@@ -237,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Avatar Card ─────────────────────────────────────────
-  Widget _buildAvatarCard(UserProvider userProvider) {
+  Widget _buildAvatarCard(UserProvider userProvider, AppLocalizations S) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 28),
@@ -277,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            userProvider.user.name.isEmpty ? 'Your Name' : userProvider.user.name,
+            userProvider.user.name.isEmpty ? S.yourName : userProvider.user.name,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -286,9 +287,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'PREMIUM MEMBER',
-            style: TextStyle(
+          Text(
+            S.premiumMember,
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: AppTheme.primary,
@@ -302,12 +303,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Stats Row ────────────────────────────────────────────
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(AppLocalizations S) {
     return Row(
       children: [
-        Expanded(child: _statCard(Icons.favorite, '24', 'SAVED RECIPES')),
+        Expanded(child: _statCard(Icons.favorite, '24', S.savedRecipes)),
         const SizedBox(width: 12),
-        Expanded(child: _statCard(Icons.restaurant, '12', 'COOKED THIS WEEK')),
+        Expanded(child: _statCard(Icons.restaurant, '12', S.cookedThisWeek)),
       ],
     );
   }
@@ -349,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Settings Card ────────────────────────────────────────
-  Widget _buildSettingsCard(BuildContext context) {
+  Widget _buildSettingsCard(BuildContext context, AppLocalizations S) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -360,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           SettingsRow(
             icon: Icons.person_outline,
-            label: 'Edit Profile',
+            label: S.editProfile,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
@@ -369,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Divider(height: 1, color: AppTheme.outline.withOpacity(0.4), indent: 52),
           SettingsRow(
             icon: Icons.people_outline,
-            label: 'Profile Management',
+            label: S.profileManagement,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ProfilesManagementScreen()),
@@ -430,7 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }),
         // Custom button
         GestureDetector(
-          onTap: () => _showAddAllergenDialog(context, userProvider),
+          onTap: () => _showAddAllergenDialog(context, userProvider, S),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
@@ -439,14 +440,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               border: Border.all(
                   color: AppTheme.outline, style: BorderStyle.solid, width: 1),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add, size: 13, color: AppTheme.textSecondary),
-                SizedBox(width: 4),
+                const Icon(Icons.add, size: 13, color: AppTheme.textSecondary),
+                const SizedBox(width: 4),
                 Text(
-                  'Custom',
-                  style: TextStyle(
+                  S.customAllergen,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
                     fontFamily: 'Inter',
@@ -672,7 +673,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SettingsRow(
               icon: Icons.favorite_outline,
               iconColor: AppTheme.primary,
-              label: 'My Favorites',
+              label: S.myFavorites,
               onTap: () {},
             ),
             Divider(
@@ -683,14 +684,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.logout,
               iconColor: AppTheme.error,
               trailing: const SizedBox.shrink(),
-              label: 'Logout',
-              onTap: () => _handleLogout(context),
+              label: S.logout,
+              onTap: () => _handleLogout(context, S),
             ),
           ] else ...[
             SettingsRow(
               icon: Icons.login,
               iconColor: AppTheme.primary,
-              label: 'Login / Register',
+              label: S.loginRegister,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -703,26 +704,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Logout ───────────────────────────────────────────────
-  Future<void> _handleLogout(BuildContext context) async {
+  Future<void> _handleLogout(BuildContext context, AppLocalizations S) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
-        title: const Text('Confirm Logout',
-            style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700)),
-        content: const Text('Are you sure you want to log out?',
-            style: TextStyle(fontFamily: 'Inter')),
+        title: Text(S.confirmLogout,
+            style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700)),
+        content: Text(S.logoutConfirmMessage,
+            style: const TextStyle(fontFamily: 'Inter')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppTheme.textSecondary)),
+            child: Text(S.cancel,
+                style: const TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Logout',
-                style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600)),
+            child: Text(S.logoutButton,
+                style: const TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -734,25 +735,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ── Add Custom Allergen Dialog ───────────────────────────
-  void _showAddAllergenDialog(BuildContext context, UserProvider userProvider) {
+  void _showAddAllergenDialog(BuildContext context, UserProvider userProvider, AppLocalizations S) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
-        title: const Text('Add Custom Allergen',
-            style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700)),
+        title: Text(S.addCustomAllergen,
+            style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700)),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'e.g. sesame'),
+          decoration: InputDecoration(hintText: S.enterAllergenHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppTheme.textSecondary)),
+            child: Text(S.cancel,
+                style: const TextStyle(color: AppTheme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
@@ -761,8 +762,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Add',
-                style: TextStyle(
+            child: Text(S.add,
+                style: const TextStyle(
                     color: AppTheme.primary, fontWeight: FontWeight.w600)),
           ),
         ],

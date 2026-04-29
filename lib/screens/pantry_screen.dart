@@ -4,36 +4,42 @@ import '../providers/pantry_provider.dart';
 import '../providers/global_provider.dart';
 import '../providers/user_provider.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import 'result_screen.dart';
 
-/// 虚拟冰箱页面 — Figma Harvest Warm 设计稿
+/// 虚拟冰箱页面
 class PantryScreen extends StatelessWidget {
   const PantryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final pantryProvider = Provider.of<PantryProvider>(context);
+    final S = AppLocalizations.of(context);
+
+    if (S == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Column(
         children: [
-          // ── 顶部导航栏 (Figma风格) ──
-          _buildNavBar(context),
-          // ── 内容区域 ──
+          _buildNavBar(context, S),
           Expanded(
             child: pantryProvider.isLoading
                 ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
                 : pantryProvider.items.isEmpty
-                    ? _buildEmptyState(context)
-                    : _buildPantryContent(context, pantryProvider),
+                    ? _buildEmptyState(context, S)
+                    : _buildPantryContent(context, pantryProvider, S),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNavBar(BuildContext context) {
+  Widget _buildNavBar(BuildContext context, AppLocalizations S) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.background.withOpacity(0.95),
@@ -52,6 +58,10 @@ class PantryScreen extends StatelessWidget {
             height: 44,
             child: Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.primary, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
                 const Spacer(),
                 const Text(
                   'EATWHAT',
@@ -79,7 +89,7 @@ class PantryScreen extends StatelessWidget {
   }
 
   /// 空状态
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations S) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,9 +100,9 @@ class PantryScreen extends StatelessWidget {
             color: AppTheme.outline.withOpacity(0.3),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Your pantry is empty',
-            style: TextStyle(
+          Text(
+            S.emptyPantry,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: AppTheme.textPrimary,
@@ -101,7 +111,7 @@ class PantryScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Use AR scan to add ingredients',
+            S.useARToAdd,
             style: TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
@@ -114,7 +124,7 @@ class PantryScreen extends StatelessWidget {
   }
 
   /// 冰箱内容
-  Widget _buildPantryContent(BuildContext context, PantryProvider pantryProvider) {
+  Widget _buildPantryContent(BuildContext context, PantryProvider pantryProvider, AppLocalizations S) {
     // 按分类分组
     final Map<String, List> groupedItems = {};
     for (var item in pantryProvider.items) {
@@ -154,9 +164,9 @@ class PantryScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'CURRENT INVENTORY',
-                          style: TextStyle(
+                        Text(
+                          S.currentInventory,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.5,
@@ -167,14 +177,14 @@ class PantryScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _buildStatValue('${pantryProvider.itemCount}', 'INGREDIENTS'),
+                            _buildStatValue('${pantryProvider.itemCount}', S.items(pantryProvider.itemCount)),
                             Container(
                               width: 1,
                               height: 40,
                               margin: const EdgeInsets.symmetric(horizontal: 24),
                               color: AppTheme.outline.withOpacity(0.2),
                             ),
-                            _buildStatValue('${groupedItems.length}', 'CATEGORIES'),
+                            _buildStatValue('${groupedItems.length}', S.categories(groupedItems.length)),
                           ],
                         ),
                       ],
@@ -241,7 +251,7 @@ class PantryScreen extends StatelessWidget {
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: () => _cookWithPantry(context, pantryProvider),
+                  onPressed: () => _cookWithPantry(context, pantryProvider, S),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -249,14 +259,14 @@ class PantryScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
-                      SizedBox(width: 12),
+                      const Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
+                      const SizedBox(width: 12),
                       Text(
-                        'COOK WITH THESE INGREDIENTS',
-                        style: TextStyle(
+                        S.cookWithThese,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -375,23 +385,23 @@ class PantryScreen extends StatelessWidget {
   }
 
   /// 用冰箱食材做菜
-  Future<void> _cookWithPantry(BuildContext context, PantryProvider pantryProvider) async {
+  Future<void> _cookWithPantry(BuildContext context, PantryProvider pantryProvider, AppLocalizations S) async {
     final globalProvider = Provider.of<GlobalProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
+      builder: (context) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(color: AppTheme.primary),
-                SizedBox(height: 16),
-                Text('Generating recipes...'),
+                const CircularProgressIndicator(color: AppTheme.primary),
+                const SizedBox(height: 16),
+                Text(S.generatingRecipe),
               ],
             ),
           ),
@@ -419,7 +429,7 @@ class PantryScreen extends StatelessWidget {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate recipes: $e')),
+          SnackBar(content: Text(S.generationFailed(e.toString()))),
         );
       }
     }

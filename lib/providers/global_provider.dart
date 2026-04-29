@@ -1,13 +1,15 @@
 import 'package:flutter/foundation.dart';
-import 'dart:typed_data';
 import '../models/recipe.dart';
 import '../models/ingredient.dart';
+import '../models/history.dart';
 import '../services/api_service.dart';
+import '../services/storage_service.dart';
 import 'user_provider.dart';
 
 /// 全局状态管理 - 管理食谱列表和应用状态
 class GlobalProvider with ChangeNotifier {
   final ApiService _apiService = ApiService.getInstance();
+  final StorageService _storage = StorageService.getInstance();
   final UserProvider _userProvider;
 
   List<Recipe> _recipes = [];
@@ -27,7 +29,7 @@ class GlobalProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   Uint8List? get currentImage => _currentImage;
 
-  /// 完整流程：识别食材并生成食谱
+  /// 完整流程：识别食材并生成食谱（来源：相册识别）
   Future<void> identifyAndGenerateRecipes({
     required Uint8List imageBytes,
   }) async {
@@ -67,6 +69,9 @@ class GlobalProvider with ChangeNotifier {
       _candidates = result.candidates;
       _isLoading = false;
       notifyListeners();
+
+      // 保存历史记录
+      await _saveHistory(HistorySource.photoScan, _recipes);
 
       print('生成成功！主菜单 ${_recipes.length} 道，备用菜 ${_candidates.length} 道');
     } catch (e) {
@@ -114,6 +119,7 @@ class GlobalProvider with ChangeNotifier {
     required List<String> allergens,
     required int servings,
     List<String>? preferences,
+    HistorySource source = HistorySource.pantryCook,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -122,6 +128,7 @@ class GlobalProvider with ChangeNotifier {
     try {
       print('=== 使用冰箱食材生成食谱 ===');
       print('食材: $ingredients');
+      print('来源: ${source.name}');
 
       final result = await _apiService.generateRecipes(
         ingredients: ingredients,
@@ -135,6 +142,9 @@ class GlobalProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
+      // 保存历史记录
+      await _saveHistory(source, _recipes);
+
       print('生成成功！主菜单 ${_recipes.length} 道，备用菜 ${_candidates.length} 道');
     } catch (e) {
       _errorMessage = e.toString();
@@ -142,6 +152,19 @@ class GlobalProvider with ChangeNotifier {
       notifyListeners();
       print('生成失败: $e');
     }
+  }
+
+  /// 保存历史记录
+  Future<void> _saveHistory(HistorySource source, List<Recipe> recipes) async {
+    if (recipes.isEmpty) return;
+    final record = HistoryRecord(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      timestamp: DateTime.now(),
+      source: source,
+      recipes: recipes,
+    );
+    await _storage.saveHistoryRecord(record);
+    print('历史记录已保存，来源: ${source.name}，食谱数量: ${recipes.length}');
   }
 
   /// 清除所有食谱

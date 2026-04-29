@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/favorite.dart';
 import '../services/auth_service.dart';
 import '../config/theme.dart';
+import '../l10n/app_localizations.dart';
 import 'recipe_detail_screen.dart';
 
-/// 收藏列表界面 — Figma Harvest Warm 设计稿
+/// 收藏列表界面
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
@@ -44,16 +45,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-  Future<void> _deleteFavorite(int favoriteId) async {
-    final S = AppLocalizations.of(context)!;
-
+  Future<void> _deleteFavorite(int favoriteId, AppLocalizations S) async {
     try {
       await _authService.deleteFavorite(favoriteId);
       await _loadFavorites();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_favoritesRemovedText(S)),
+            content: Text(S.historyDeleted),
             backgroundColor: AppTheme.primary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -65,7 +64,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_deleteFailedText(S)}: $e')),
+          SnackBar(content: Text(S.deleteFailed)),
         );
       }
     }
@@ -79,27 +78,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       backgroundColor: AppTheme.background,
       body: Column(
         children: [
-          // ── 顶部导航栏 (Figma风格) ──
           _buildNavBar(context),
-          // ── Editorial Header ──
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'CURATED HARVEST',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2,
-                    color: AppTheme.secondary,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-                const SizedBox(height: 8),
                 Text(
-                  _favoritesPageTitle(S),
+                  S.favoritesPageTitle,
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -110,7 +96,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _favoritesSubtitle(S),
+                  S.favoritesSubtitle,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textSecondary,
@@ -122,15 +108,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── Content ──
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
                 : _errorMessage != null
-                    ? _buildErrorState()
+                    ? _buildErrorState(S)
                     : _favorites.isEmpty
-                        ? _buildEmptyState()
+                        ? _buildEmptyState(S)
                         : RefreshIndicator(
                             onRefresh: _loadFavorites,
                             color: AppTheme.primary,
@@ -139,7 +123,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               itemCount: _favorites.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 12),
                               itemBuilder: (context, index) {
-                                return _buildFavoriteCard(_favorites[index]);
+                                return _buildFavoriteCard(_favorites[index], S);
                               },
                             ),
                           ),
@@ -147,76 +131,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ],
       ),
     );
-  }
-
-  String _favoritesSubtitle(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '收藏你最喜欢的菜谱，方便随时回来看。';
-    }
-    return 'A personal collection of your most cherished culinary discoveries.';
-  }
-
-  String _favoritesRemovedText(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '已取消收藏';
-    }
-    return 'Removed from favorites';
-  }
-
-  String _deleteFailedText(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '删除失败';
-    }
-    return 'Failed to delete';
-  }
-
-  String _favoritesPageTitle(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '我的收藏';
-    }
-    return 'Your Favorites';
-  }
-
-  String _removeFavoriteTitle(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '移除收藏';
-    }
-    return 'Remove Favorite';
-  }
-
-  String _removeFavoriteMessage(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '确定要把这道菜从收藏中移除吗？';
-    }
-    return 'Are you sure you want to remove this recipe from favorites?';
-  }
-
-  String _removeText(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '移除';
-    }
-    return 'Remove';
-  }
-
-  String _emptyFavoritesTitle(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '还没有收藏';
-    }
-    return 'No favorites yet';
-  }
-
-  String _emptyFavoritesSubtitle(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '去收藏你喜欢的菜谱吧';
-    }
-    return 'Start saving recipes you love';
-  }
-
-  String _retryText(AppLocalizations S) {
-    if (S.localeName.startsWith('zh')) {
-      return '重试';
-    }
-    return 'Retry';
   }
 
   Widget _buildNavBar(BuildContext context) {
@@ -265,7 +179,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildFavoriteCard(Favorite favorite) {
+  Widget _buildFavoriteCard(Favorite favorite, AppLocalizations S) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -293,7 +207,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           child: Row(
             children: [
-              // Thumbnail
               Container(
                 width: 64,
                 height: 64,
@@ -316,8 +229,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,8 +256,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ],
                 ),
               ),
-
-              // Delete button
               Container(
                 width: 32,
                 height: 32,
@@ -358,7 +267,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   padding: EdgeInsets.zero,
                   iconSize: 18,
                   icon: const Icon(Icons.delete, color: AppTheme.error),
-                  onPressed: () => _showDeleteDialog(favorite),
+                  onPressed: () => _showDeleteDialog(favorite, S),
                 ),
               ),
             ],
@@ -368,8 +277,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  void _showDeleteDialog(Favorite favorite) {
-    final S = AppLocalizations.of(context)!;
+  void _showDeleteDialog(Favorite favorite, AppLocalizations S) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -377,11 +285,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         title: Text(
-          _removeFavoriteTitle(S),
+          S.removeFavoriteTitle,
           style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
         ),
         content: Text(
-          _removeFavoriteMessage(S),
+          S.removeFavoriteMessage,
           style: const TextStyle(fontFamily: 'Inter'),
         ),
         actions: [
@@ -392,10 +300,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _deleteFavorite(favorite.id);
+              _deleteFavorite(favorite.id, S);
             },
             child: Text(
-              _removeText(S),
+              S.remove,
               style: const TextStyle(color: AppTheme.error, fontWeight: FontWeight.w600),
             ),
           ),
@@ -404,8 +312,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    final S = AppLocalizations.of(context)!;
+  Widget _buildEmptyState(AppLocalizations S) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -413,7 +320,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Icon(Icons.favorite_border, size: 80, color: AppTheme.outline.withOpacity(0.3)),
           const SizedBox(height: 24),
           Text(
-            _emptyFavoritesTitle(S),
+            S.emptyFavoritesTitle,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -423,7 +330,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _emptyFavoritesSubtitle(S),
+            S.emptyFavoritesSubtitle,
             style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
@@ -435,8 +342,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildErrorState() {
-    final S = AppLocalizations.of(context)!;
+  Widget _buildErrorState(AppLocalizations S) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -446,7 +352,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Text(_errorMessage!, style: const TextStyle(color: AppTheme.error)),
           const SizedBox(height: 16),
           GradientButton(
-            label: _retryText(S),
+            label: S.retry,
             onPressed: _loadFavorites,
             width: 120,
           ),
