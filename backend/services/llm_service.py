@@ -3,7 +3,7 @@ import json
 import re
 from threading import Lock
 
-from config import LLM_API_URL, LLM_MODEL
+from config import LLM_API_KEY, LLM_API_URL, LLM_MODEL
 from schemas.recipe_generation import GeneratedMenu
 
 PANTRY_STAPLES = {
@@ -309,7 +309,10 @@ class LLMService:
     def __init__(self):
         self.model_name = LLM_MODEL
         self.api_url = LLM_API_URL
-        print(f"[LLM Service] initialization completed，the local model has been mounted: {self.model_name}")
+        self.api_key = LLM_API_KEY
+        if not self.api_key:
+            raise RuntimeError("缺少 LLM_API_KEY，请在 backend/.env 中填写 DeepSeek API Key")
+        print(f"[LLM Service] initialization completed，the DeepSeek model has been mounted: {self.model_name}")
 
     def generate_menu(self, diners: int, ingredients: list, dietary: list = None, allergens: list = None,
                       preferences: list = None):
@@ -399,13 +402,19 @@ class LLMService:
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.7,
-            "max_tokens": -1,
-            "stream": False
+            "max_tokens": 8192,
+            "stream": False,
+            "response_format": {"type": "json_object"},
+            "thinking": {"type": "disabled"},
         }
 
         try:
-            # request to LM Studio / OpenAI API, limit 3 mins
-            res = requests.post(self.api_url, json=payload, timeout=180)
+            # request to DeepSeek / OpenAI compatible API, limit 3 mins
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+            res = requests.post(self.api_url, json=payload, headers=headers, timeout=180)
             res.raise_for_status()
 
             # Parse the response in OpenAI format
