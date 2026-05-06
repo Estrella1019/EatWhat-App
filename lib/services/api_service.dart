@@ -16,7 +16,7 @@ class ApiService {
   static ApiService? _instance;
   late Dio _dio;
 
-  static const String _baseUrl = 'http://192.168.31.65:8000';
+  static const String _baseUrl = 'http://192.168.1.10:8000';
 
   ApiService._() {
     _dio = Dio(BaseOptions(
@@ -131,6 +131,11 @@ class ApiService {
       } else {
         throw Exception('生成食谱失败: ${response.statusCode}');
       }
+    } on DioException catch (e) {
+      final message = e.response?.data is Map<String, dynamic>
+          ? e.response?.data['message']?.toString()
+          : null;
+      throw Exception('生成食谱失败: ${message ?? e.message}');
     } catch (e) {
       throw Exception('生成食谱失败: $e');
     }

@@ -124,6 +124,36 @@ class AiValidationTests(unittest.TestCase):
         self.assertEqual(result["planned_dish_count"], 1)
         self.assertEqual(result["recipes"][0]["name"]["zh"], "番茄炒蛋")
 
+    def test_menu_validation_fills_blank_units_for_to_taste_ingredients(self) -> None:
+        menu = sample_menu()
+        menu["recipes"][0]["ingredients"][1]["quantity"] = "适量"
+        menu["recipes"][0]["ingredients"][1]["unit"] = {"zh": "", "en": ""}
+
+        result = validate_menu_payload(
+            menu,
+            ingredients=["番茄"],
+            allergens=[],
+        )
+
+        unit = result["recipes"][0]["ingredients"][1]["unit"]
+        self.assertEqual(unit, {"zh": "适量", "en": "to taste"})
+
+    def test_menu_validation_accepts_common_oil_staple_aliases(self) -> None:
+        menu = sample_menu()
+        menu["recipes"][0]["ingredients"][1] = {
+            "name": {"zh": "植物油", "en": "Vegetable oil"},
+            "quantity": "适量",
+            "unit": {"zh": "适量", "en": "to taste"},
+        }
+
+        result = validate_menu_payload(
+            menu,
+            ingredients=["番茄"],
+            allergens=[],
+        )
+
+        self.assertEqual(result["recipes"][0]["ingredients"][1]["name"]["zh"], "植物油")
+
     def test_parse_llm_json_content_repairs_common_syntax_glitches(self) -> None:
         malformed = """
         {

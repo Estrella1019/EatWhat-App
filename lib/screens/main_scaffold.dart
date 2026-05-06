@@ -19,6 +19,8 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   late int _currentIndex;
+  int _favoritesRefreshKey = 0;
+  int _historyRefreshKey = 0;
 
   @override
   void initState() {
@@ -26,13 +28,26 @@ class _MainScaffoldState extends State<MainScaffold> {
     _currentIndex = widget.initialIndex;
   }
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    PantryScreen(),
-    FavoritesScreen(),
-    HistoryScreen(),
-    ProfileScreen(),
-  ];
+  void _selectIndex(int index) {
+    setState(() {
+      _currentIndex = index;
+      if (index == 2) {
+        _favoritesRefreshKey++;
+      } else if (index == 3) {
+        _historyRefreshKey++;
+      }
+    });
+  }
+
+  List<Widget> _buildScreens() {
+    return [
+      const HomeScreen(),
+      const PantryScreen(),
+      FavoritesScreen(key: ValueKey('favorites-$_favoritesRefreshKey')),
+      HistoryScreen(key: ValueKey('history-$_historyRefreshKey')),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +61,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: _buildScreens(),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -72,35 +87,35 @@ class _MainScaffoldState extends State<MainScaffold> {
                   activeIcon: _buildScanActiveIcon(),
                   label: S.scanIngredient,
                   isSelected: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
+                  onTap: () => _selectIndex(0),
                 ),
                 _NavItem(
                   icon: _buildFridgeIcon(),
                   activeIcon: _buildFridgeActiveIcon(),
                   label: S.myFridge,
                   isSelected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
+                  onTap: () => _selectIndex(1),
                 ),
                 _NavItem(
                   icon: _buildHeartIcon(),
                   activeIcon: _buildHeartActiveIcon(),
                   label: S.favorites,
                   isSelected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
+                  onTap: () => _selectIndex(2),
                 ),
                 _NavItem(
                   icon: _buildHistoryIcon(),
                   activeIcon: _buildHistoryActiveIcon(),
                   label: S.history,
                   isSelected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  onTap: () => _selectIndex(3),
                 ),
                 _NavItem(
                   icon: _buildUserIcon(),
                   activeIcon: _buildUserActiveIcon(),
                   label: S.myProfile,
                   isSelected: _currentIndex == 4,
-                  onTap: () => setState(() => _currentIndex = 4),
+                  onTap: () => _selectIndex(4),
                 ),
               ],
             ),

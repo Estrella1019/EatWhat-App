@@ -8,8 +8,9 @@ class AuthService {
   static AuthService? _instance;
   late Dio _dio;
   String? _token;
+  late Future<void> _tokenLoaded;
 
-  static const String _baseUrl = 'http://localhost:8000';
+  static const String _baseUrl = 'http://192.168.1.10:8000';
   static const String _tokenKey = 'auth_token';
   static const String _usernameKey = 'username';
 
@@ -43,7 +44,7 @@ class AuthService {
     ));
 
     // 启动时加载token
-    _loadToken();
+    _tokenLoaded = _loadToken();
   }
 
   static AuthService getInstance() {
@@ -228,6 +229,7 @@ class AuthService {
   /// 获取收藏列表
   Future<List<Favorite>> getFavorites() async {
     try {
+      await _tokenLoaded;
       final response = await _dio.get('/api/users/favorites');
       final code = response.data['code'] as int;
       if (code == 200) {
@@ -250,6 +252,7 @@ class AuthService {
     required Map<String, dynamic> recipeData,
   }) async {
     try {
+      await _tokenLoaded;
       final response = await _dio.post(
         '/api/users/favorites',
         data: AddFavoriteRequest(
@@ -274,6 +277,7 @@ class AuthService {
   /// 删除收藏
   Future<void> deleteFavorite(int favoriteId) async {
     try {
+      await _tokenLoaded;
       final response = await _dio.delete('/api/users/favorites/$favoriteId');
       final code = response.data['code'] as int;
       if (code != 200) {

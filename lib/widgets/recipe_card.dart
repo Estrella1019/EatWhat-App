@@ -95,6 +95,8 @@ class _RecipeCardState extends State<RecipeCard>
   }
 
   Widget _buildCard() {
+    final heroId = widget.recipe.id.isNotEmpty ? widget.recipe.id : widget.recipe.name;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Material(
@@ -115,7 +117,7 @@ class _RecipeCardState extends State<RecipeCard>
                 Stack(
                   children: [
                     Hero(
-                      tag: 'recipe_${widget.recipe.id}',
+                      tag: 'recipe_$heroId',
                       child: ClipRRect(
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(AppTheme.radiusMd),

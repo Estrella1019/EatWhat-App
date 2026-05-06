@@ -14,9 +14,15 @@ PANTRY_STAPLES = {
     "冰糖",
     "油",
     "食用油",
+    "植物油",
+    "菜籽油",
+    "玉米油",
+    "调和油",
     "橄榄油",
     "香油",
     "芝麻油",
+    "蒜",
+    "大蒜",
     "酱油",
     "生抽",
     "老抽",
@@ -27,7 +33,6 @@ PANTRY_STAPLES = {
     "水",
     "葱",
     "姜",
-    "蒜",
     "葱姜蒜",
     "胡椒",
     "胡椒粉",
@@ -41,6 +46,10 @@ PANTRY_STAPLES = {
     "salt",
     "sugar",
     "oil",
+    "cookingoil",
+    "vegetableoil",
+    "canolaoil",
+    "cornoil",
     "oliveoil",
     "sesameoil",
     "soy sauce",
@@ -323,8 +332,17 @@ class LLMService:
         allergens = allergens or []
         preferences = preferences or []
 
-        # Prompt
-        prompt = f"""
+        def build_prompt(validation_feedback: str | None = None) -> str:
+            retry_note = ""
+            if validation_feedback:
+                retry_note = f"""
+
+【上一次输出未通过校验】
+原因: {validation_feedback}
+请重新生成，必须修正这个问题。不要使用任何未提供的主食、蛋白质、蔬菜、水果、乳制品、坚果、谷物或成品食材。
+"""
+
+            return f"""
 你是一个顶级的国际米其林 AI 厨师长。
 请根据以下就餐情况，自主决定应该做几道菜（通常 N 个人需要 N 到 N+1 道菜的组合），规划出一桌完美的菜单。
 同时，额外再提供 2 道备用菜（candidates），供用户在不满意某道主菜时直接替换，不得与主菜重复。
@@ -346,6 +364,8 @@ class LLMService:
 3. 严禁新增任何未提供的主食、蛋白质、蔬菜、水果或成品食材。
    例如：意大利面、米饭、鸡蛋、牛奶、奶油、芝士、面粉，如果不在输入里就绝对不能出现。
 4. 如果某道菜做不出来，就换一道，不要偷偷补充新食材。
+5. 常见基础调味料只限：盐、糖、油/食用油/植物油、酱油、醋、料酒、蚝油、淀粉、水、葱、姜、蒜、胡椒、辣椒、花椒、香菜。
+{retry_note}
 
 【输出格式要求】
 你必须输出一个完整的 JSON。格式如下：
@@ -394,41 +414,48 @@ class LLMService:
 
 【重要】只输出纯 JSON，不要输出任何多余文字、解释或 markdown 代码块。确保所有花括号和方括号正确闭合，输出必须是合法可解析的 JSON。
 """
-        # Assemble the request body (OpenAI compatible)
-        payload = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": "You are a Michelin-star chef that outputs structured JSON for recipe planning."},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.7,
-            "max_tokens": 8192,
-            "stream": False,
-            "response_format": {"type": "json_object"},
-            "thinking": {"type": "disabled"},
-        }
 
-        try:
-            # request to DeepSeek / OpenAI compatible API, limit 3 mins
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
+        last_error: Exception | None = None
+        for attempt in range(2):
+            prompt = build_prompt(str(last_error) if last_error else None)
+
+            # Assemble the request body (OpenAI compatible)
+            payload = {
+                "model": self.model_name,
+                "messages": [
+                    {"role": "system", "content": "You are a Michelin-star chef that outputs structured JSON for recipe planning."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.7 if attempt == 0 else 0.2,
+                "max_tokens": 8192,
+                "stream": False,
+                "response_format": {"type": "json_object"},
+                "thinking": {"type": "disabled"},
             }
-            res = requests.post(self.api_url, json=payload, headers=headers, timeout=180)
-            res.raise_for_status()
 
-            # Parse the response in OpenAI format
-            result_json = res.json()
-            raw_text = result_json["choices"][0]["message"]["content"]
+            try:
+                # request to DeepSeek / OpenAI compatible API, limit 3 mins
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                }
+                res = requests.post(self.api_url, json=payload, headers=headers, timeout=180)
+                res.raise_for_status()
 
-            # Parse JSON with lightweight repair for common LLM syntax glitches.
-            data = parse_llm_json_content(raw_text)
+                # Parse the response in OpenAI format
+                result_json = res.json()
+                raw_text = result_json["choices"][0]["message"]["content"]
 
-            return validate_menu_payload(data, ingredients=ingredients, allergens=allergens)
+                # Parse JSON with lightweight repair for common LLM syntax glitches.
+                data = parse_llm_json_content(raw_text)
 
-        except Exception as e:
-            # If it fails or times out, throw exception out to caller
-            raise RuntimeError(f"大模型生成菜单失败: {str(e)}")
+                return validate_menu_payload(data, ingredients=ingredients, allergens=allergens)
+
+            except Exception as e:
+                last_error = e
+
+        # If it fails or times out, throw exception out to caller
+        raise RuntimeError(f"大模型生成菜单失败: {str(last_error)}")
 
 
 _llm_service: LLMService | None = None

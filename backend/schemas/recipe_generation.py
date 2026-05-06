@@ -64,6 +64,23 @@ class GeneratedIngredient(BaseModel):
     quantity: str
     unit: LocalizedText
 
+    @model_validator(mode="before")
+    @classmethod
+    def fill_blank_unit(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+
+        unit = data.get("unit")
+        if not isinstance(unit, dict):
+            return data
+
+        zh = unit.get("zh")
+        en = unit.get("en")
+        if isinstance(zh, str) and isinstance(en, str) and not zh.strip() and not en.strip():
+            data = {**data, "unit": {"zh": "适量", "en": "to taste"}}
+
+        return data
+
     @field_validator("quantity")
     @classmethod
     def validate_quantity(cls, value: str) -> str:
